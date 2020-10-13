@@ -27,3 +27,19 @@ se l'ordine è finito)??
 - l'ordine corrente lo definiamo in base a order_ts_end se settato o meno, è corretto?
 
 - come definiamo il kit e il problema nell'interfaccia di Elisa??
+
+
+
+------------------------
+
+- notifica area di lavoro e agv dinamici
+
+- inizio e durata 
+
+- icona gialla nel momento in cui error_time e stop_time sono settati
+
+- percentuali agv e simboli
+
+- nascondere cosu statistiche quando clicco su AGV
+
+
