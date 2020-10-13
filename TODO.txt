@@ -1,0 +1,29 @@
+-se è stato scelto: ritentare --> setStatusOK e andiamo avanti (non c'è più errore, ma il task è messo OK, cioè tra i prelievi successful)
+i task che hanno avuto problemi devono essere leggermente diversificati (non tutti verdi, ma ad es. giallo)
+
+-se è stato scelto: rimanere fermo --> si autoseleziona una delle comunicazioni per operatore (dovrebbe anche scegliere un operatore 
+    da una lista che per adesso non è presente) stato del task è pending a questo punto (viene inviata notifica ad interfaccia dell'operatore)
+
+-se l'operatore dice not ok ---> torna il popup (di notifica) all'operatore remoto con un nuovo errore
+
+-calcolare percentuale reale di prelievo AGV e mettere triangolino e cancel-icon solo in presenza di errori
+
+-estrarre i dati all'inizio relativi ai task effettuati e da effettuare
+(ed eventualmente anche i dati relativi al numero di AGV presenti in ogni area di lavoro, ecc...)
+
+-login effettuato solo quando cliccato "procedi" nella parte di risolvi (una volta per tutte).
+
+-collegamento tra notifica risolvi e corrispettiva pagina
+
+-Modificare hardcoded setSolveAction
+
+
+
+DOMANDE MILA:
+
+-Quando finiscono i task lato server Mila deve settare che l'ordine è finito definendo il campo order_ts_end al timestamp corrente(è così che si controlla
+se l'ordine è finito)??
+
+- l'ordine corrente lo definiamo in base a order_ts_end se settato o meno, è corretto?
+
+- come definiamo il kit e il problema nell'interfaccia di Elisa??

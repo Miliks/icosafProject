@@ -1,0 +1,24 @@
+#modal {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    justify-items: center;
+    text-align: center;
+    width: 110vh;
+    height: 75vh;
+}
+
+.checkboxList, mat-radio-group
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 25px;
+
+}
+
+#divCheckboxes {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}

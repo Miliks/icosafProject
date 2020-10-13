@@ -1,0 +1,194 @@
+<mat-accordion>
+    <mat-expansion-panel #problemPanel class="border">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                Problemi rilevati
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <!-----------TABLE -->
+        <table mat-table [dataSource]="dataSourceProblems" multiTemplateDataRows  #matSortProblems="matSort" matSort>
+            <!-- State Column -->
+            <ng-container matColumnDef="state">
+                <th mat-header-cell *matHeaderCellDef class="normalColumn"> STATO </th>
+                <td mat-cell *matCellDef="let element" class="normalColumn">
+                    <div>
+                        <mat-icon svgIcon="error-icon" aria-hidden="false" aria-label="Example home icon">
+                        </mat-icon>
+                    </div>
+                </td>
+            </ng-container>
+
+            <!-- Id Column -->
+            <ng-container matColumnDef="id">
+                <th mat-header-cell *matHeaderCellDef class="normalColumn" mat-sort-header> Componente </th>
+                <td mat-cell *matCellDef="let element" class="normalColumn"> <b> {{element.id | uppercase }} </b></td>
+            </ng-container>
+
+
+            <!-- Problems Column -->
+            <ng-container matColumnDef="problemsFound">
+                <th mat-header-cell *matHeaderCellDef class="normalColumn" mat-sort-header> Problemi Rilevati </th>
+                <td mat-cell *matCellDef="let element" class="normalColumn">
+                    <p class="errorType">{{element.problemsFound}}</p>
+                </td>
+            </ng-container>
+
+
+            <!-- Solve Button Column -->
+            <ng-container matColumnDef="button">
+                <th mat-header-cell *matHeaderCellDef class="normalColumn"> </th>
+                <td mat-cell *matCellDef="let element" class="normalColumn">
+                    <button *ngIf="element.state==3" name="risolvi" mat-flat-button class="solveButton"
+                        (click)="solve(element)">
+                        RISOLVI
+                    </button>
+                </td>
+            </ng-container>
+
+            <!-- Kit Column -->
+            <ng-container matColumnDef="kit">
+                <th mat-header-cell *matHeaderCellDef class="normalColumn" mat-sort-header> Kit </th>
+                <td mat-cell *matCellDef="let element" class="normalColumn"> {{element.kit}}</td>
+            </ng-container>
+
+
+            <!-- Hour Column -->
+            <ng-container matColumnDef="hour">
+                <th mat-header-cell *matHeaderCellDef class="lastColumn" mat-sort-header> Ora </th>
+                <td mat-cell *matCellDef="let element" class="lastColumn"> {{element.hour}} </td>
+            </ng-container>
+
+            <!-- <button mat-raised-button color="primary">RISOLVI</button> -->
+
+
+            <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
+            <ng-container matColumnDef="expandedDetail">
+
+                <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplay.length">
+                    <div class="example-element-detail"
+                        [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+                        <div *ngIf="!isHidingProblemHandling else problemDetails" class="handleProblemForm">
+                            <div class="inlineDiv">
+                                <h1 mat-dialog-title>Gestione Problema</h1>
+                                <mat-icon aria-hidden="false" aria-label="Close Icon"
+                                    (click)="expandedElement=null">close
+                                </mat-icon>
+                            </div>
+                            <p> Selezionare le comunicazioni da inviare</p>
+                            <form>
+                                <div mat-dialog-content>
+                                    <div id="divCheckboxes">
+                                        <div class="checkboxList">
+                                            <p>COMUNICAZIONI PER AGV</p>
+                                            <mat-radio-group color="primary"  
+                                                aria-label="Select an option" #AGVActionSelected>
+                                                <mat-radio-button *ngFor="let agvOption of agvOptions; let i = index" value="{{i}}" (click)="AGVActionSelection(agvOption)">{{agvOption}}</mat-radio-button>
+                                            </mat-radio-group>
+                                        </div>
+                                        <div class="checkboxList">
+                                            <p>COMUNICAZIONI PER OPERATORE</p>
+                                            <mat-radio-group color="primary" #OperatorSelection
+                                                aria-label="Select an option">
+                                                <mat-radio-button *ngFor="let opOption of opOptions; let op_index=index" [disabled]="opOption.dis" value="{{op_index}}" [checked]="opOption.val" (click)="OpActionSelection(opOption)">{{opOption.text}}</mat-radio-button>
+                                                <u>Aggiungere un testo</u>
+                                            </mat-radio-group>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button mat-flat-button (click)="proceed()" class="proceedButton">PROCEDI</button>
+                            </form>
+                        </div>
+                        <ng-template #problemDetails>
+                            <div class="rightContent">
+                                <p>IMMAGINI</p>
+                                <mat-list id="listImages">
+                                    <mat-list-item *ngFor="let problemSrc of problems"><img [src]="problemSrc.image"
+                                            (click)="openImage(problemSrc)" /> </mat-list-item>
+                                </mat-list>
+                                <p><u>Richiedi altre immagini</u></p>
+
+                                <p><u>LOG AGV</u></p>
+                            </div>
+                        </ng-template>
+                    </div>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+            <tr mat-row *matRowDef="let element; columns: columnsToDisplay;" class="example-element-row"
+                [class.example-expanded-row]="expandedElement === element"
+                (click)="expandedElement = expandedElement === element ? null : element; isHidingProblemHandling = true;">
+            </tr>
+            <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
+        </table>
+        <mat-paginator #paginatorErrors [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+
+    </mat-expansion-panel>
+</mat-accordion>
+
+<mat-accordion>
+    <mat-expansion-panel class="border">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                Elenco prelievi
+            </mat-panel-title>
+
+        </mat-expansion-panel-header>
+
+        <!-- Content of expansion panel -->
+
+        <table mat-table [dataSource]="dataSourcePrelievi"  #matSortPrelievi="matSort" multiTemplateDataRows matSort>
+            <!-- State Column -->
+            <ng-container matColumnDef="state">
+                <th mat-header-cell *matHeaderCellDef class="normalColumn"> STATO </th>
+                <td mat-cell *matCellDef="let element">
+                    <div [ngSwitch]="element.state">
+                        <!-- 0: ok or problem solved, 1: warning , 2: not yet considered, 3: loading-->
+                        
+                        <mat-icon *ngSwitchCase="2" aria-hidden="false" aria-label="Example home icon" color="success">
+                            check_circle
+                        </mat-icon>
+                        <!-- <div *ngSwitchCase="1">
+                        </div> -->
+                        <!-- <mat-icon *ngSwitchCase="2" aria-hidden="false" aria-label="Example home icon" color="inactive">
+                            cancel
+                        </mat-icon> -->
+                        <!-- <mat-icon *ngSwitchCase="5" aria-hidden="false" aria-label="Example home icon" color="looping">
+                            loop
+                        </mat-icon> -->
+                        <mat-icon *ngSwitchCase="4" aria-hidden="false" aria-label="Example home icon" color="looping">
+                            check_circle
+                        </mat-icon>
+                        <div *ngSwitchDefault>
+                        </div>
+                    </div>
+                </td>
+            </ng-container>
+
+            <!-- Id Column -->
+            <ng-container matColumnDef="components">
+                <th mat-header-cell *matHeaderCellDef class="normalColumn" mat-sort-header> COMPONENTI </th>
+                <td mat-cell *matCellDef="let element"> <b> {{element.components | uppercase }} </b></td>
+            </ng-container>
+
+            <!-- Hour Column -->
+            <ng-container matColumnDef="kit">
+                <th mat-header-cell *matHeaderCellDef class="normalColumn" mat-sort-header> KIT </th>
+                <td mat-cell *matCellDef="let element"> {{element.kit}} </td>
+            </ng-container>
+
+            <!-- Problems Column -->
+            <ng-container matColumnDef="hour">
+                <th mat-header-cell *matHeaderCellDef class="lastColumn" mat-sort-header> ORA </th>
+                <td mat-cell *matCellDef="let element" class="lastColumn"> {{element.hour}}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumnsPrelievi"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumnsPrelievi;"></tr>
+        </table>
+        <mat-paginator #paginatorPrelievi [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+
+
+    </mat-expansion-panel>
+</mat-accordion>

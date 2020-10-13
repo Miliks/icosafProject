@@ -1,0 +1,109 @@
+/* .mat-table{
+    width: 100%;
+}
+
+td {
+    height: 50px;
+    vertical-align: center;
+  }
+
+  mat-accordion{
+    height: 2%;
+    width: 80%;
+  }
+
+  #risolviButton{
+    text-align: center;
+  }
+
+  .fillspace{
+    margin-left: 25%;
+    margin-right: 25%;
+  } */
+
+
+
+
+  /* 
+  
+  Table
+  */
+
+  table {
+    width: 100%;
+  }
+  
+  tr.example-detail-row {
+    height: 0;
+  }
+  
+  tr.example-element-row:not(.example-expanded-row):hover {
+    background: whitesmoke;
+  }
+  
+  tr.example-element-row:not(.example-expanded-row):active {
+    background: #efefef;
+  }
+  
+  .example-element-row td {
+    border-bottom-width: 0;
+  }
+  
+  .example-element-detail {
+    overflow: hidden;
+    display: flex;
+    height: max-content;
+    justify-content: center;
+  }
+  
+  .example-element-diagram {
+    min-width: 80px;
+    border: 2px solid black;
+    padding: 8px;
+    font-weight: lighter;
+    margin: 8px 0;
+    height: 104px;
+  }
+  
+  .example-element-hour {
+    font-weight: bold;
+    font-size: 40px;
+    line-height: normal;
+  }
+  
+  .example-element-description {
+    padding: 16px;
+  }
+  
+  .example-element-description-attribution {
+    opacity: 0.5;
+  }
+
+  button[name="risolvi"]{
+    position: relative;
+    margin-right: 25px ;
+  }
+
+  .example-fill-remaining-space {
+    /* This fills the remaining space, by using flexbox. 
+       Every toolbar row uses a flexbox row layout. */
+    flex: 1 1 auto;
+  }
+
+  #listImages{
+    display: flex;
+    flex-direction: row;
+    justify-items: center;
+    overflow: auto;
+    max-width: 80vh;
+    height: 40vh;
+} 
+img{   
+    width: 25vh;
+    height: 25vh;
+}
+#listImages .mat-list-item {
+  height: auto;
+}
+
+

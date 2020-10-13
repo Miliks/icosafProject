@@ -1,0 +1,25 @@
+<div id="modal">
+    <h1 mat-dialog-title>Gestione Problema</h1>
+    <p> Selezionare le comunicazioni da inviare</p>
+    <form>
+        <div mat-dialog-content>
+            <div id="divCheckboxes">
+                <div class="checkboxList">
+                    <p>COMUNICAZIONI PER AGV</p>
+                    <mat-radio-group #AGVSelection aria-label="Select an option">
+                        <mat-radio-button value="1">Option 1</mat-radio-button>
+                        <mat-radio-button value="2">Option 2</mat-radio-button>
+                    </mat-radio-group>
+                </div>
+                <div class="checkboxList">
+                    <p>COMUNICAZIONI PER OPERATORE</p>
+                    <mat-radio-group #OperatorSelection aria-label="Select an option">
+                        <mat-radio-button value="1">Option 1</mat-radio-button>
+                        <mat-radio-button value="2">Option 2</mat-radio-button>
+                    </mat-radio-group>
+                </div>
+            </div>
+        </div>
+        <button mat-button (click)="confirm()">CONFIRM</button>
+    </form>
+</div>

@@ -1,0 +1,20 @@
+start
+select orders from today with the status 1 - means, just created - http://icowms.cloud.reply.eu/Details/getOrdLis
+get the list of AGV for the specific order (first order for today) http://icowms.cloud.reply.eu/Details/getListAGV?order_id=1
+get the list of tasks related to this orders filtered by AGV from the list below: http://icowms.cloud.reply.eu/Details/getTaskListAGV?order_id=1&agv_id=1
+task list order should be the same as the order to pick up the items
+initial status of the task will be created status_id=1, start_time is the time when the picking is started if the item picked up without any problem the stop_time is updated with the coresponding value and the status is changed to the 2 (completed). 
+if the error happened during the picking, the error_time is registered and the error even is generated for this task_id. Error is associated with the agv_id and media file. Solitions available for such an error.
+Error notification is coming up into the UI and the operator can specify the suggestions based on the tipology of the error.
+solve action should be visualized based on the error_type: 
+Quando operatore clicca sul bottone risolvi, deve venire un popup: "identificati" (login/password) devono essere gia registrati nella sistema. Possiamo fare il drop down list del operatori e puoi un campo libero per mettere il password o tutti i due campi liberi? 
+http://icowms.cloud.reply.eu/Details/getListOper?order_id=1
+
+authenticazione del operatore va eseguita usando l'API: POST  http://icowms.cloud.reply.eu/Details/verifyPwd
+esempio body:
+  "login": "mrossi"}
+  se risposta "200 OK" authenticazione andata a buon fine, se no, viene fuori un errore di criptografia (500 server error) devo ancora lavorare per gestire meglio, ma fate in caso 200 OK - a posto, altrimenti non puo andare avanti.
+  s
+ 
+
+
