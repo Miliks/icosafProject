@@ -74,7 +74,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   displayedColumnsPrelievi: string[] = ['state', 'components', 'kit', 'hour'];
   dataSourcePrelievi: MatTableDataSource<Prelievo>
   problems: Slide[];
-  taskErrorId: string;
+  taskErrorId: Number;
 
 
   AGVActionSelection(actionSelected: string) {
@@ -147,16 +147,16 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   ngAfterViewInit(): void {
 
-    this.activatedRoute.queryParams.subscribe(queryParams => {
-      if (queryParams['taskId']) {
 
-        this.taskErrorId = queryParams['taskId']
+    //Se c'è errore allora lo dobbiamo far vedere
+    if (this.taskErrorId) {
+      this.problemPanel.open()
+      this.expandedElement = this.dataSourceProblems.data.find(problem => problem.id === `PN${this.taskErrorId}`)
+      this.isHidingProblemHandling = false
+    }
 
-        this.problemPanel.open()
-        this.expandedElement = this.dataSourceProblems.data.find(problem => problem.id === `PN${queryParams['taskId']}`)
-        this.isHidingProblemHandling = false
-      }
-    })
+
+
     this.paginatorPrelievi = this.dataSourcePrelievi.paginator
     this.paginatorErrors = this.dataSourceProblems.paginator
     this.matSortProblems = this.dataSourcePrelievi.sort
@@ -166,9 +166,6 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
 
     //TODO chiamata per ottenere tutti i problemi e i task risolti fino a quel momento
-
-
-
 
     this.paramsSub = this.activatedRoute.params.subscribe(params => {
 
@@ -211,6 +208,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
               case 3:
               //pending
               case 4:
+                this.taskErrorId = task.task_id
                 sourceProblems.push({
                   state: 3,
                   id: `PN${task.task_id}`,
@@ -247,16 +245,13 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
             .getServerSentEvent("http://sseicosaf.cloud.reply.eu/events")
             .subscribe(data => {
 
-              console.log("D ",data);
-              console.log("D.d ",data.data);
-              
-              
+              console.log("D.d ", data.data);
+
+
               let response = JSON.parse(data.data)
 
 
               if (response.status === "OK") {
-
-                console.log("CIao", response);
 
                 let taskId = response.task_id
 
@@ -328,16 +323,13 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   proceed() {
-    // console.log(this.AGVActionSelected);
-    // console.log(this.OpActionSelected);
-
-
     this.UCCService.getLastActionError(15).subscribe(success => {
       console.log(success[0].error_id);
 
       this.UCCService.setSolveAction(this.AGVActionSelected, 1, 1, 1, success[0].error_id).subscribe(response => {
         this.UCCService.setTaskStatusOk(Number(this.taskErrorId)).subscribe(_ => {
           console.log("Risolvi ora", response)
+          this.taskErrorId = null
         })
       })
     })

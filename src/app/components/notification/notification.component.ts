@@ -27,7 +27,7 @@ export class NotificationComponent implements OnInit {
   }
 
   risolviOra() {
-    this.router.navigate(["Home", { outlets: { dashboardContent: ["work-area", this.workAreaId, "agv-details", this.agvId] } }], { queryParams: { taskId: this.taskId } });
+    this.router.navigate(["Home", { outlets: { dashboardContent: ["work-area", this.workAreaId, "agv-details", this.agvId] } }]);
   }
 
 
