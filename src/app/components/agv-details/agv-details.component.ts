@@ -244,7 +244,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
         if (!this.sseSubscription) {
 
           this.sseSubscription = this.sseService
-            .getServerSentEvent("http://localhost:4200/API/events")
+            .getServerSentEvent("http://sseicosaf.cloud.reply.eu/events")
             .subscribe(data => {
 
               let response = JSON.parse(data.data)

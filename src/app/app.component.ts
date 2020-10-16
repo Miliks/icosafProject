@@ -75,7 +75,7 @@ export class AppComponent implements OnInit {
     
     console.log("Contacting events...")
     this.sseService
-      .getServerSentEvent("http://localhost:4200/API/events")
+      .getServerSentEvent("http://sseicosaf.cloud.reply.eu/events")
       .subscribe(response => {
 
         console.log(response)

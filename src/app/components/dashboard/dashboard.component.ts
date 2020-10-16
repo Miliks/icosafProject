@@ -142,7 +142,7 @@ export class DashboardComponent implements OnInit {
 
 
     this.sseService
-      .getServerSentEvent("http://localhost:4200/API/events")
+      .getServerSentEvent("http://sseicosaf.cloud.reply.eu/events")
       .subscribe(data => {
 
         //TODO:recompute percentage tasks
