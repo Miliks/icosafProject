@@ -55,7 +55,7 @@ export class UCCService {
     return this.http.get<Task[]>(url).pipe(retry(3))
 
   }
-  getOrdListByDateAndUC<Order>(uc: string, timestamp: string): Observable<Order[]> {
+  getOrdListByDateAndUC<Order>(uc: string, timestamp: string): Observable<Order[]> {    
     let url = `http://icowms.cloud.reply.eu/Details/getOrdListbyDate?ts=${timestamp}&uc=${uc}`
     return this.http.get<Order[]>(url).pipe(retry(3))
 

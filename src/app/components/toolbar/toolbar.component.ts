@@ -35,7 +35,7 @@ export class ToolbarComponent implements OnInit {
 
       for (let i = 0; i < segments.length; i++) {
 
-        console.log(segments[i])
+        //console.log(segments[i])
         switch (segments[i]) {
           case "(dashboardContent:work-area":
             segments[i] = "Area di Lavoro"

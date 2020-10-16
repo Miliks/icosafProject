@@ -247,11 +247,14 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
             .getServerSentEvent("http://sseicosaf.cloud.reply.eu/events")
             .subscribe(data => {
 
+              console.log("D ",data);
+              console.log("D.d ",data.data);
+              
+              
               let response = JSON.parse(data.data)
 
 
               if (response.status === "OK") {
-
 
                 console.log("CIao", response);
 

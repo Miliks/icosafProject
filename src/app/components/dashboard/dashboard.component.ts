@@ -8,6 +8,7 @@ import { UCCService } from 'src/app/services/UC-C/uc-c-service.service';
 import { Order } from 'src/app/model/order.model';
 import { Task } from 'src/app/model/task.model';
 import { SseService } from 'src/app/services/SseService/sse-service.service';
+import { LoginDialogComponent } from '../login/login-dialog/login-dialog.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -114,27 +115,38 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
-    this.selectWorkArea(this.workAreas[0])
-    this.openAgvDetails(this.selectedWorkArea, this.selectedWorkArea.agvList[0]);
+    
+    if(!this.selectedWorkArea && !this.selectedAgv){
+      this.selectWorkArea(this.workAreas[0])    
+      this.openAgvDetails(this.selectedWorkArea, this.selectedWorkArea.agvList[0]);
+    }
 
     //TODO remove timestamp hardcoded
     this.UCCService.getSubjectSelectedWorkAreaAndAgv().subscribe(workAreaAndAgvIds => {
-
-      this.selectWorkArea(this.workAreas.find(workArea => workArea.id === workAreaAndAgvIds[0]))
+            
+      this.selectedWorkArea = this.workAreas.find(workArea => workArea.id === workAreaAndAgvIds[0])
+      //this.selectWorkArea(this.workAreas.find(workArea => workArea.id === workAreaAndAgvIds[0]))
+      //console.log("selected is ", this.selectedWorkArea);      
+      //console.log("its AGVList is ", this.selectedWorkArea.agvList);
+      
       this.openAgvDetails(this.selectedWorkArea, this.selectedWorkArea.agvList.find(agv => agv.id === workAreaAndAgvIds[1]))
     })
+    
     //TODO calcolo percentuali di risoluzione task corrente
     this.UCCService.getOrdListByDateAndUC("UC-C", "2020-07-24").subscribe((orders: Order[]) => {
+    
       //Ottengo il primo ordine non terminato e definisco questo come ordine corrente
       this.UCCService.currentOrder = orders.find(order => order.order_ts_end == null)
       //salvo nella sessione currentOrder
       localStorage.setItem('currentOrder', JSON.stringify(this.UCCService.currentOrder));
 
-      this.UCCService.getTaskListOrder(this.UCCService.currentOrder.order_id).subscribe(task => {
-        //TODO QUI devo calcolare quella che poi sarà la percentuale da mostrare per l'ordine
-
-
+      
+      this.UCCService.getTaskListOrder(this.UCCService.currentOrder.order_id).subscribe((tasks: Task[]) => {
+        // Per ricavare la workarea in cui lavora il nostro agv facciamo una ricerca interna per il momento
+       // w1.agvList[0].setProgress(completed*100/total)
+       // w1.agvList[0].setError(error)
+       //Funziona solo se esiste almeno un task
+       calculatePercentage(tasks, this.workAreas)        
       })
     })
 
@@ -145,42 +157,70 @@ export class DashboardComponent implements OnInit {
       .getServerSentEvent("http://sseicosaf.cloud.reply.eu/events")
       .subscribe(data => {
 
-        //TODO:recompute percentage tasks
+        //recompute percentage tasks
+        this.UCCService.getTaskListOrder(this.UCCService.currentOrder.order_id).subscribe((tasks: Task[]) => {
+          // Per ricavare la workarea in cui lavora il nostro agv facciamo una ricerca interna per il momento
+         // w1.agvList[0].setProgress(completed*100/total)
+         // w1.agvList[0].setError(error)
+         //Funziona solo se esiste almeno un task
+         calculatePercentage(tasks, this.workAreas)        
+        })
 
       })
 
 
   }
 
+  
+
   openAgvDetails(workArea: WorkArea, agv: Agv) {
-    this.router.navigate(["Home", { outlets: { dashboardContent: ["work-area", workArea.id, "agv-details", agv.id] } }]);
+
     this.selectedAgv = agv
     this.selectedWorkArea = workArea
+    //console.log(this.selectedAgv);
 
-    console.log(this.selectedAgv);
+    this.router.navigate(["Home", { outlets: { dashboardContent: ["work-area", workArea.id, "agv-details", agv.id] } }]);
 
-    event.stopPropagation();
+    //event.stopPropagation();
   }
 
   selectWorkArea(workArea: WorkArea) {
     this.selectedAgv = null
-    if (this.selectedWorkArea == workArea) {
-      //unselect the card
-      this.selectedWorkArea = null
-    }
-    else
+    if(this.selectedWorkArea == null)
       this.selectedWorkArea = workArea
-
-    // remove details about card
-    this.router.navigate(["Home"])
+    else{
+      this.selectedWorkArea = null
+      this.router.navigate(["Home"])
+    }
   }
 
   openGraph(typeGraph: string) {
-    event.stopPropagation();
+    //event.stopPropagation();
     this.router.navigate(["Home", { outlets: { dashboardContent: ["work-area", this.selectedWorkArea.id, "statistics", typeGraph] } }]);
   }
 
 
+}
+export function calculatePercentage(tasks : Task[], workAreas: WorkArea[]){
+  let error = false
+  let completed = 0
+  let total = tasks.length
+  let involvedAgv;
+  for (let i = 0; i < tasks.length; i++) {
+    if(tasks[i].task_status_id === 3 /* TODO: add condition about PENDING status*/ ){
+      error=true
+    }
+    if(tasks[i].task_status_id === 2)
+      completed++
+  }
+  let agv 
+  let wa = workAreas.find(wa=>{
+    agv = wa.agvList.find(a=>a.id === tasks[0].agv_id)
+    return agv !== undefined
+  })  
+  
+  wa.agvList.find(a => a.id === agv.id).setProgress(completed*100/total)
+  wa.agvList.find(a => a.id === agv.id).setError(error)
 }
 
 

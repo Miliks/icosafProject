@@ -89,7 +89,7 @@ export class AppComponent implements OnInit {
             data: {
               workAreaId: '0',
               taskId: data.task_id,
-              agvId: '0'
+              agvId: '1'
             },
             panelClass: "zeroPaddingModal"
           })
