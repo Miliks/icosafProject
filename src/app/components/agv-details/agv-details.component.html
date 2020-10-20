@@ -69,12 +69,14 @@
                     <div class="example-element-detail"
                         [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
                         <div *ngIf="!isHidingProblemHandling else problemDetails" class="handleProblemForm">
-                            <div class="inlineDiv">
-                                <h1 mat-dialog-title>Gestione Problema</h1>
-                                <mat-icon aria-hidden="false" aria-label="Close Icon"
+                            
+                            
+                                <mat-icon class="dialogCloseIcon" aria-hidden="false" aria-label="Close Icon"
                                     (click)="expandedElement=null">close
                                 </mat-icon>
-                            </div>
+                            
+                            <h1 class="dialogTitle" mat-dialog-title>Gestione Problema</h1>
+                            
                             <p> Selezionare le comunicazioni da inviare</p>
                             <form>
                                 <div mat-dialog-content>

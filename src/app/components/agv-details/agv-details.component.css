@@ -145,3 +145,11 @@
   flex-direction: row;
   justify-content: space-between;
 }
+
+.dialogCloseIcon{
+  display: flex;
+  align-self: flex-end;
+}
+.dialogTitle{
+text-align: center;
+}
