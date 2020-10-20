@@ -118,7 +118,8 @@
     justify-items: center;
     text-align: center;
     width: 70vh;
-    height: 45vh;
+    height: auto;
+    margin-bottom: 2vh;
 }
 
 .checkboxList, mat-radio-group
