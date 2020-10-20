@@ -15,19 +15,21 @@ export class NotificationComponent implements OnInit {
   taskId: string
   workAreaId: string
   agvId: string
+  uc: string;
   constructor(
     private router: Router,
     @Inject(MAT_DIALOG_DATA) public data, private UCCService: UCCService) {
     if (data.taskId) this.taskId = data.taskId
     if (data.workAreaId) this.workAreaId = data.workAreaId
     if (data.agvId) this.agvId = data.agvId
+    if (data.uc) this.uc = data.uc
   }
 
   ngOnInit(): void {
   }
 
   risolviOra() {
-    this.router.navigate(["Home", { outlets: { dashboardContent: ["work-area", this.workAreaId, "agv-details", this.agvId] } }]);
+    this.router.navigate(["Home", "use-case", `${this.uc}`, { outlets: { dashboardContent: ["work-area", this.workAreaId, "agv-details", this.agvId] } }]);
   }
 
 

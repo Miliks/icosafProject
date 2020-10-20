@@ -75,7 +75,7 @@ export class AppComponent implements OnInit {
     
     console.log("Contacting events...")
     this.sseService
-      .getServerSentEvent("http://sseicosaf.cloud.reply.eu/events")
+      .getServerSentEvent("http://localhost:4200/API/events")
       .subscribe(response => {
 
         console.log(response)
@@ -87,9 +87,10 @@ export class AppComponent implements OnInit {
             width: 'auto',
             height: 'auto',
             data: {
-              workAreaId: '0',
+              workAreaId: data.area_id,
               taskId: data.task_id,
-              agvId: '1'
+              agvId: data.agv_id,
+              uc: data.uc
             },
             panelClass: "zeroPaddingModal"
           })

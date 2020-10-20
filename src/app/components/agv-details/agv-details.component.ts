@@ -231,9 +231,6 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
             this.dataSourcePrelievi.sort = this.matSortPrelievi
             this.dataSourceProblems.paginator = this.paginatorErrors
             this.dataSourceProblems.sort = this.matSortProblems
-
-
-
           })
 
 
@@ -242,13 +239,17 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
         if (!this.sseSubscription) {
 
           this.sseSubscription = this.sseService
-            .getServerSentEvent("http://sseicosaf.cloud.reply.eu/events")
+            .getServerSentEvent("http://localhost:4200/API/events")
             .subscribe(data => {
 
+
+              console.log("D ", data);
               console.log("D.d ", data.data);
 
 
               let response = JSON.parse(data.data)
+
+              console.log(response)
 
 
               if (response.status === "OK") {

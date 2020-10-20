@@ -31,7 +31,7 @@ const routes: Routes = [
     component: UseCaseDetailsComponent,
   },
   {
-    path: 'Home',
+    path: 'Home/use-case/:useCase',
     component: DashboardComponent,
     children: [
       {
@@ -40,7 +40,7 @@ const routes: Routes = [
         outlet: "dashboardContent"
       },
       {
-        path: 'work-area/:workAreaId/statistics/:graphType',
+        path: 'use-case/:useCase/work-area/:workAreaId/statistics/:graphType',
         component: StatsComponent,
         outlet: "dashboardContent",
       }
