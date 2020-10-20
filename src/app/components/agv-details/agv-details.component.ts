@@ -5,7 +5,7 @@ import { ProblemModalComponent } from '../UCDetails/modal/problem-modal.componen
 import { MatTableDataSource } from '@angular/material/table';
 import { ProblemImageComponent, Slide } from './error-image-modal/problem-image.component';
 import { SseService } from 'src/app/services/SseService/sse-service.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatPaginator } from '@angular/material/paginator';
 import { Subscription } from 'rxjs';
 import { UCCService } from 'src/app/services/UC-C/uc-c-service.service';
@@ -53,7 +53,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('problemPanel', { static: false }) problemPanel: MatExpansionPanel
 
-  sseSubscription: Subscription
+  sseSub: Subscription
 
   @ViewChild('matSortProblems') matSortProblems: MatSort;
   @ViewChild('matSortPrelievi') matSortPrelievi: MatSort;
@@ -72,10 +72,11 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   agvOptions = ['Ritentare', 'Rimanere fermo', 'Continuo attività']
   opOptions = [{ text: 'Richiesta intervento', val: false, dis: false }, { text: 'Richiesta interveno urgente', val: false, dis: false }]
 
-  displayedColumnsPrelievi: string[] = ['state', 'components', 'kit', 'hour','delay'];
+  displayedColumnsPrelievi: string[] = ['state', 'components', 'kit', 'hour', 'delay'];
   dataSourcePrelievi: MatTableDataSource<Prelievo>
   problems: Slide[];
   taskErrorId: Number;
+  queryParamsSub: Subscription;
 
 
   AGVActionSelection(actionSelected: string) {
@@ -134,6 +135,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     public imageDialog: MatDialog,
     private sseService: SseService,
     private UCCService: UCCService,
+    private router: Router,
     private activatedRoute: ActivatedRoute) {
 
     this.isHidingProblemHandling = true
@@ -147,17 +149,6 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dataSourceProblems = new MatTableDataSource()
   }
   ngAfterViewInit(): void {
-
-
-    //Se c'è errore allora lo dobbiamo far vedere
-    if (this.taskErrorId) {
-      this.problemPanel.open()
-      this.expandedElement = this.dataSourceProblems.data.find(problem => problem.id === `PN${this.taskErrorId}`)
-      this.isHidingProblemHandling = false
-    }
-
-
-
     this.paginatorPrelievi = this.dataSourcePrelievi.paginator
     this.paginatorErrors = this.dataSourceProblems.paginator
     this.matSortProblems = this.dataSourcePrelievi.sort
@@ -197,12 +188,12 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
               //completed
               case 2:
                 sourcePrelievi.push({
-                  state: task.error_time? 4:2,
+                  state: task.error_time ? 4 : 2,
                   components: `PN${task.task_id}`,
                   kit: "45",
                   //   hour: task.stop_time.toLocaleTimeString('it', options)
-                  hour: new Date().toLocaleTimeString('it', options), 
-                  delay: task.computeDelayInMilliseconds()/1000
+                  hour: new Date().toLocaleTimeString('it', options),
+                  delay: task.computeDelayInMilliseconds() / 1000
                 })
 
                 break;
@@ -233,23 +224,18 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
             this.dataSourcePrelievi.sort = this.matSortPrelievi
             this.dataSourceProblems.paginator = this.paginatorErrors
             this.dataSourceProblems.sort = this.matSortProblems
-
-
-
           })
-
-
         })
 
-        if (!this.sseSubscription) {
+        if (!this.sseSub) {
 
-          this.sseSubscription = this.sseService
+          this.sseSub = this.sseService
             .getServerSentEvent("http://localhost:4200/API/events")
             .subscribe(data => {
 
               //console.log("D.d ",data.data);
-              
-              
+
+
               let response = JSON.parse(data.data)
 
 
@@ -302,11 +288,22 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     })
+
+    this.queryParamsSub = this.activatedRoute.queryParams.subscribe(queryParams => {
+      if (queryParams['openError']) {
+        //Se c'è errore allora lo dobbiamo far vedere
+        this.problemPanel.open()
+        this.expandedElement = this.dataSourceProblems.data.find(problem => problem.id === `PN${queryParams['openError']}`)
+        this.taskErrorId = Number(queryParams['openError'])
+        this.isHidingProblemHandling = false
+      }
+    })
   }
 
   ngOnDestroy(): void {
     this.paramsSub.unsubscribe()
-    this.sseSubscription.unsubscribe()
+    this.queryParamsSub.unsubscribe()
+    this.sseSub.unsubscribe()
   }
 
 

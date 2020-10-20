@@ -29,7 +29,7 @@ export class NotificationComponent implements OnInit {
   }
 
   risolviOra() {
-    this.router.navigate(["Home", "use-case", `${this.uc}`, { outlets: { dashboardContent: ["work-area", this.workAreaId, "agv-details", this.agvId] } }]);
+    this.router.navigate(["Home", "use-case", `${this.uc}`, { outlets: { dashboardContent: ["work-area", this.workAreaId, "agv-details", this.agvId] }}],{ queryParams: { openError: this.taskId } });
   }
 
 

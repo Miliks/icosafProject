@@ -32,14 +32,7 @@ se l'ordine è finito)??
 
 ------------------------
 
-- notifica area di lavoro e agv dinamici
-
-- inizio e durata 
-
 - icona gialla nel momento in cui error_time e stop_time sono settati
 
-- percentuali agv e simboli
-
-- nascondere cosu statistiche quando clicco su AGV
 
 

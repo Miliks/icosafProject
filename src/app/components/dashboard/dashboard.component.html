@@ -55,7 +55,7 @@
 
                             </mat-list-item>
                         </mat-list>
-                        <div class="statistics" *ngIf="selectedWorkArea == workArea">
+                        <div class="statistics" *ngIf="selectedWorkArea == workArea && !selectedAgv">
                             <mat-accordion (click)="openGraph('MCT'); $event.stopPropagation();">
                                 <mat-expansion-panel #expPanelCycleTime disabled="true">
                                     <mat-expansion-panel-header>
