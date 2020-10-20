@@ -33,6 +33,7 @@ interface Prelievo {
   components: string
   kit: string;
   hour: string;
+  delay: number;
 }
 
 
@@ -61,7 +62,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild("OperatorSelection") opSelection: MatRadioGroup
   @ViewChild("AGVActionSelected") AGVsel: MatRadioGroup
   dataSourceProblems: MatTableDataSource<Problem>
-  columnsToDisplay = ['state', 'id', 'kit', 'problemsFound', 'button', 'hour'];
+  displayedColumnsProblems = ['state', 'id', 'kit', 'problemsFound', 'button', 'hour'];
   expandedElement: Problem | null;
   isHidingProblemHandling: boolean
   AGVActionSelected: string
@@ -71,7 +72,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   agvOptions = ['Ritentare', 'Rimanere fermo', 'Continuo attività']
   opOptions = [{ text: 'Richiesta intervento', val: false, dis: false }, { text: 'Richiesta interveno urgente', val: false, dis: false }]
 
-  displayedColumnsPrelievi: string[] = ['state', 'components', 'kit', 'hour'];
+  displayedColumnsPrelievi: string[] = ['state', 'components', 'kit', 'hour','delay'];
   dataSourcePrelievi: MatTableDataSource<Prelievo>
   problems: Slide[];
   taskErrorId: Number;
@@ -180,8 +181,8 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
           let sourceProblems: Problem[] = []
           let sourcePrelievi: Prelievo[] = []
           //TODO: definire come dare settare le due data source problemi e prelievi
-          tasks.forEach((task: Task) => {
-
+          tasks.forEach((t: Task) => {
+            let task = new Task(t.task_id, t.task_descr, t.mach_det_id, t.order_id, t.start_time, t.stop_time, t.task_status_id, t.task_comment, t.agv_id, t.oper_id, t.error_time, t.component_id, t.task_type_id, t.task_ref, t.create_time)
             switch (task.task_status_id) {
               //created
               case 1:
@@ -196,11 +197,12 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
               //completed
               case 2:
                 sourcePrelievi.push({
-                  state: 2,
+                  state: task.error_time? 4:2,
                   components: `PN${task.task_id}`,
                   kit: "45",
                   //   hour: task.stop_time.toLocaleTimeString('it', options)
-                  hour: new Date().toLocaleTimeString('it', options)
+                  hour: new Date().toLocaleTimeString('it', options), 
+                  delay: task.computeDelayInMilliseconds()/1000
                 })
 
                 break;
@@ -231,6 +233,9 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
             this.dataSourcePrelievi.sort = this.matSortPrelievi
             this.dataSourceProblems.paginator = this.paginatorErrors
             this.dataSourceProblems.sort = this.matSortProblems
+
+
+
           })
 
 
@@ -242,14 +247,10 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
             .getServerSentEvent("http://localhost:4200/API/events")
             .subscribe(data => {
 
-
-              console.log("D ", data);
-              console.log("D.d ", data.data);
-
-
+              //console.log("D.d ",data.data);
+              
+              
               let response = JSON.parse(data.data)
-
-              console.log(response)
 
 
               if (response.status === "OK") {
@@ -267,7 +268,8 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
                   state: problemFound ? 4 : 2,
                   components: `PN${taskId}`,
                   kit: "45",
-                  hour: new Date().toLocaleTimeString('it', options)
+                  hour: new Date().toLocaleTimeString('it', options),
+                  delay: response.delay
                 }]
                 sourcePrelievi = sourcePrelievi.sort((a, b) => b.hour.localeCompare(a.hour))
 
@@ -327,6 +329,8 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.UCCService.getLastActionError(15).subscribe(success => {
       console.log(success[0].error_id);
 
+      //TODO: se la pagina viene aggiornata quando spunta la notifica, queste informazioni non sono presenti
+      // e non si sa chi è taskErrorId
       this.UCCService.setSolveAction(this.AGVActionSelected, 1, 1, 1, success[0].error_id).subscribe(response => {
         this.UCCService.setTaskStatusOk(Number(this.taskErrorId)).subscribe(_ => {
           console.log("Risolvi ora", response)

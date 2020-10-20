@@ -1,8 +1,45 @@
 export class Task{
-    public get create_time(): Date {
+
+    private _create_time_date: Date;
+    private _start_time_date: Date;
+    private _stop_time_date: Date; 
+    private _error_time_date: Date;
+
+
+    public get create_time_date(): Date {
+        this.create_time_date = new Date(this.create_time.replace("T", " ").replace("Z", ""))
+        return this._create_time_date;
+    }
+    public set create_time_date(value: Date) {
+        this._create_time_date = value;
+    }
+    public get start_time_date(): Date {
+        this.start_time_date = new Date(this.start_time.replace("T", " ").replace("Z", ""))
+        return this._start_time_date;
+    }
+    public set start_time_date(value: Date) {
+        this._start_time_date = value;
+    }
+    public get stop_time_date(): Date {
+        this.stop_time_date = new Date(this.stop_time.replace("T", " ").replace("Z", ""))
+        return this._stop_time_date;
+    }
+    public set stop_time_date(value: Date) {
+        this._stop_time_date = value;
+    }
+    
+    public get error_time_date(): Date {
+        this.error_time_date = new Date(this.error_time.replace("T", " ").replace("Z", ""))
+        return this._error_time_date;
+    }
+    public set error_time_date(value: Date) {
+        this._error_time_date = value;
+    }
+
+    public get create_time(): string {
         return this._create_time;
     }
-    public set create_time(value: Date) {
+    public set create_time(value: string) {
         this._create_time = value;
     }
     public get task_ref(): String {
@@ -23,10 +60,10 @@ export class Task{
     public set component_id(value: Number) {
         this._component_id = value;
     }
-    public get error_time(): Date {
+    public get error_time(): string {
         return this._error_time;
     }
-    public set error_time(value: Date) {
+    public set error_time(value: string) {
         this._error_time = value;
     }
     public get oper_id(): Number {
@@ -53,16 +90,16 @@ export class Task{
     public set task_status_id(value: Number) {
         this._task_status_id = value;
     }
-    public get stop_time(): Date {
+    public get stop_time(): string {
         return this._stop_time;
     }
-    public set stop_time(value: Date) {
+    public set stop_time(value: string) {
         this._stop_time = value;
     }
-    public get start_time(): Date {
+    public get start_time(): string {
         return this._start_time;
     }
-    public set start_time(value: Date) {
+    public set start_time(value: string) {
         this._start_time = value;
     }
     public get order_id(): Number {
@@ -95,20 +132,24 @@ export class Task{
         private _task_descr: String,
         private _mach_det_id: Number,
         private _order_id: Number,
-        private _start_time: Date,
-        private _stop_time: Date,
+        private _start_time: string,
+        private _stop_time: string,
         private _task_status_id: Number,
         private _task_comment: String,
         private _agv_id: Number,
         private _oper_id: Number,
-        private _error_time: Date,
+        private _error_time: string,
         private _component_id: Number,
         private _task_type_id: Number,
         private _task_ref: String,
-        private _create_time: Date){
-
+        private _create_time: string, 
+        ){
+            
     }
 
+    computeDelayInMilliseconds() :number{
+        return this.stop_time_date.getTime() - this.start_time_date.getTime()
+    }
 
 
 }
