@@ -40,7 +40,7 @@ const routes: Routes = [
         outlet: "dashboardContent"
       },
       {
-        path: 'use-case/:useCase/work-area/:workAreaId/statistics/:graphType',
+        path: 'work-area/:workAreaId/statistics/:graphType',
         component: StatsComponent,
         outlet: "dashboardContent",
       }
