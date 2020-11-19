@@ -78,9 +78,9 @@ export class AppComponent implements OnInit {
       .getServerSentEvent("http://localhost:4200/API/events")
       .subscribe(response => {
 
-        console.log(response)
+        //console.log(response)
         let data = JSON.parse(response.data)
-        console.log(data)
+        //console.log(data)
         if (data.status === "NOK") {
           const dialogRef = this.dialog.open(NotificationComponent, {
             disableClose:true,

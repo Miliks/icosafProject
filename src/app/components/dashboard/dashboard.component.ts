@@ -90,26 +90,26 @@ export class DashboardComponent implements OnInit {
       if (params['useCase']) {
         this.useCase = params['useCase']
 
-        let w0 = this.useCase === "UC-C" ? new WorkArea(1, "AMR", [new Agv(1)]) : new WorkArea(1, "CSKP", [new Agv(1), new Agv(2), new Agv(3), new Agv(4)])
-        let w2 = new WorkArea(2, "2", [new Agv(8), new Agv(9)])
-        let w3 = new WorkArea(3, "3", [new Agv(10), new Agv(11)])
-        let w4 = new WorkArea(4, "4", [new Agv(12), new Agv(13)])
+        let w1_2 = this.useCase === "UC-C" ? new WorkArea(1, "AMR", [new Agv(1),new Agv(2)]) : new WorkArea(2, "CSKP", [new Agv(3), new Agv(4), new Agv(5), new Agv(6)])
+        //   let w3 = new WorkArea(3, "3", [new Agv(10), new Agv(11)])
+        //   let w4 = new WorkArea(4, "4", [new Agv(12), new Agv(13)])
+        //   let w5 = new WorkArea(5, "5", [new Agv(8), new Agv(9)])
 
-       
 
-        w2.agvList[0].setProgress(100)
-        w2.agvList[1].setProgress(52)
-        w2.agvList[1].setError(true)
 
-        w3.agvList[0].setProgress(100)
-        w3.agvList[1].setProgress(52)
-        w3.agvList[1].setError(true)
+        //    w5.agvList[0].setProgress(100)
+        //    w5.agvList[1].setProgress(52)
+        //    w5.agvList[1].setError(true)
 
-        w4.agvList[0].setProgress(77)
-        w4.agvList[1].setProgress(99)
-        w4.agvList[1].setError(true)
+        //    w3.agvList[0].setProgress(100)
+        //   w3.agvList[1].setProgress(52)
+        //    w3.agvList[1].setError(true)
 
-        this.workAreas.push(w0, w2, w3, w4)
+        //    w4.agvList[0].setProgress(77)
+        //    w4.agvList[1].setProgress(99)
+        //    w4.agvList[1].setError(true)
+
+        this.workAreas.push(w1_2) // w5, w3, w4
 
 
         if (!this.selectedWorkArea && !this.selectedAgv) {
@@ -121,7 +121,7 @@ export class DashboardComponent implements OnInit {
         this.UCCService.getSubjectSelectedWorkAreaAndAgv().subscribe(workAreaAndAgvIds => {
 
           console.log(workAreaAndAgvIds);
-          
+
           this.selectedWorkArea = this.workAreas.find(workArea => workArea.id === workAreaAndAgvIds[0])
           //this.selectWorkArea(this.workAreas.find(workArea => workArea.id === workAreaAndAgvIds[0]))
           //console.log("selected is ", this.selectedWorkArea);      
@@ -196,25 +196,69 @@ export class DashboardComponent implements OnInit {
 
 }
 export function calculatePercentage(tasks: Task[], workAreas: WorkArea[]) {
-  let error = false
-  let completed = 0
-  let total = tasks.length
-  let involvedAgv;
+
+
+  let agvIdsMap = new Map<Number, Statistics>()
+
   for (let i = 0; i < tasks.length; i++) {
-    if (tasks[i].task_status_id === 3 /* TODO: add condition about PENDING status*/) {
-      error = true
+    let id = tasks[i].agv_id
+
+
+    if (id) {
+      if (!agvIdsMap.has(id)) {
+        let stat = { completed: 0, total: 1, error: false }
+
+        if (tasks[i].task_status_id === 3 /* TODO: add condition about PENDING status*/) {
+          stat.error = true
+        }
+        if (tasks[i].task_status_id === 2)
+          stat.completed++
+
+        console.log("setting", id, stat);
+
+        agvIdsMap.set(id, stat)
+      }
+      else {
+        let stat = agvIdsMap.get(id)
+        stat.total++
+
+        if (tasks[i].task_status_id === 3 /* TODO: add condition about PENDING status*/) {
+          stat.error = true
+        }
+        if (tasks[i].task_status_id === 2)
+          stat.completed++
+
+          console.log("setting", id, stat);
+
+        agvIdsMap.set(id, stat)
+
+      }
     }
-    if (tasks[i].task_status_id === 2)
-      completed++
   }
+
   let agv
-  let wa = workAreas.find(wa => {
-    agv = wa.agvList.find(a => a.id === tasks[0].agv_id)
-    return agv !== undefined
-  })
+  let wa
 
-  wa.agvList.find(a => a.id === agv.id).setProgress(completed * 100 / total)
-  wa.agvList.find(a => a.id === agv.id).setError(error)
+  console.log("WA", workAreas)
+
+  for (let id of agvIdsMap.keys()) {
+    console.log("ID", id);
+
+    wa = workAreas.find(wa => {
+      agv = wa.agvList.find(a => a.id == id)
+      return agv !== undefined
+    })
+    let currentStat = agvIdsMap.get(id)
+    wa.agvList.find(a => a.id == id).setProgress(currentStat.completed * 100 / currentStat.total)
+    wa.agvList.find(a => a.id == id).setError(currentStat.error)
+  }
+
+
+
 }
-
+interface Statistics {
+  completed: number,
+  total: number,
+  error: boolean
+}
 

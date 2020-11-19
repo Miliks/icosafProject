@@ -77,6 +77,8 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   problems: Slide[];
   taskErrorId: Number;
   queryParamsSub: Subscription;
+  useCase: string;
+  selectedAgv: string;
 
 
   AGVActionSelection(actionSelected: string) {
@@ -158,17 +160,19 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
 
     //TODO chiamata per ottenere tutti i problemi e i task risolti fino a quel momento
-
     this.paramsSub = this.activatedRoute.params.subscribe(params => {
 
-      if (params['workAreaId'] && params['agvId']) {
+      if (params['workAreaId'] && params['agvId'] && this.activatedRoute.parent.snapshot.params["useCase"]) {
+        this.useCase = this.activatedRoute.parent.snapshot.params["useCase"] 
+        this.selectedAgv = params['agvId']
 
         this.UCCService.subjectSelectedWorkAreaAndAgv.next([Number(params['workAreaId']), Number(params['agvId'])])
+console.log("parametri",this.UCCService.currentOrder.order_id, params['agvId']);
 
-        this.UCCService.getTaskListAgv(this.UCCService.currentOrder.order_id, params['agvId']).subscribe(tasks => {
+        this.UCCService.getTaskListAgv(this.UCCService.currentOrder.order_id, Number(params['agvId'])).subscribe(tasks => {
 
-
-
+          console.log(tasks);
+          
           let sourceProblems: Problem[] = []
           let sourcePrelievi: Prelievo[] = []
           //TODO: definire come dare settare le due data source problemi e prelievi
@@ -228,6 +232,8 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
         })
 
         if (!this.sseSub) {
+          console.log("Mi iscrivo");
+
 
           this.sseSub = this.sseService
             .getServerSentEvent("http://localhost:4200/API/events")
@@ -238,50 +244,55 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
               let response = JSON.parse(data.data)
 
+              let uc:string = response.uc;
 
-              if (response.status === "OK") {
+              console.log(uc, this.useCase, response.agv_id, response.agv_id, this.selectedAgv)
 
-                let taskId = response.task_id
+              if (uc === this.useCase && response.agv_id !== null && response.agv_id === Number(this.selectedAgv)) {
 
-                let problemFound = false
-
-                let sourceProblem = this.dataSourceProblems.data.filter(problem => { problemFound = true; return problem.id !== `PN${taskId}` })
-
-                this.dataSourceProblems.data = sourceProblem
-
-
-                let sourcePrelievi = [...this.dataSourcePrelievi.data, {
-                  state: problemFound ? 4 : 2,
-                  components: `PN${taskId}`,
-                  kit: "45",
-                  hour: new Date().toLocaleTimeString('it', options),
-                  delay: response.delay
-                }]
-                sourcePrelievi = sourcePrelievi.sort((a, b) => b.hour.localeCompare(a.hour))
-
-                this.dataSourcePrelievi.data = sourcePrelievi
-
-                this.dataSourcePrelievi.paginator = this.paginatorPrelievi
-                this.dataSourcePrelievi.sort = this.matSortPrelievi
-
-              } else {
-                if (response.status === "NOK") {
+                if (response.status === "OK") {
 
                   let taskId = response.task_id
-                  this.dataSourceProblems.data = [
-                    {
-                      state: 3,
-                      id: `PN${response.task_id}`,
-                      kit: 'Nome kit',
-                      hour: new Date().toLocaleTimeString('it', options),
-                      problemsFound: 'Tipologia Problema',
-                      button: '',
-                      description: `Problem description`,
-                    }
-                  ]
 
-                  this.dataSourceProblems.paginator = this.paginatorErrors
-                  this.dataSourceProblems.sort = this.matSortProblems
+                  let problemFound = false
+
+                  let sourceProblem = this.dataSourceProblems.data.filter(problem => { problemFound = true; return problem.id !== `PN${taskId}` })
+
+                  this.dataSourceProblems.data = sourceProblem
+
+                  let sourcePrelievi = [...this.dataSourcePrelievi.data, {
+                    state: problemFound ? 4 : 2,
+                    components: `PN${taskId}`,
+                    kit: "45",
+                    hour: new Date().toLocaleTimeString('it', options),
+                    delay: response.delay
+                  }]
+                  sourcePrelievi = sourcePrelievi.sort((a, b) => b.hour.localeCompare(a.hour))
+
+                  this.dataSourcePrelievi.data = sourcePrelievi
+
+                  this.dataSourcePrelievi.paginator = this.paginatorPrelievi
+                  this.dataSourcePrelievi.sort = this.matSortPrelievi
+
+                } else {
+                  if (response.status === "NOK") {
+
+                    let taskId = response.task_id
+                    this.dataSourceProblems.data = [
+                      {
+                        state: 3,
+                        id: `PN${response.task_id}`,
+                        kit: 'Nome kit',
+                        hour: new Date().toLocaleTimeString('it', options),
+                        problemsFound: 'Tipologia Problema',
+                        button: '',
+                        description: `Problem description`,
+                      }
+                    ]
+
+                    this.dataSourceProblems.paginator = this.paginatorErrors
+                    this.dataSourceProblems.sort = this.matSortProblems
+                  }
                 }
               }
             })
@@ -304,6 +315,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.paramsSub.unsubscribe()
     this.queryParamsSub.unsubscribe()
     this.sseSub.unsubscribe()
+    this.sseSub = null
   }
 
 
@@ -332,6 +344,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.UCCService.setTaskStatusOk(Number(this.taskErrorId)).subscribe(_ => {
           console.log("Risolvi ora", response)
           this.taskErrorId = null
+          this.ngOnInit()
         })
       })
     })

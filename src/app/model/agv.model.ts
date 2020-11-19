@@ -12,7 +12,7 @@ export class Agv {
     }
 
     public getProgress(): number {
-        return this.progress;
+        return Number(this.progress.toFixed(2));
     }
     public setProgress(value: number) {
         this.progress = value;
