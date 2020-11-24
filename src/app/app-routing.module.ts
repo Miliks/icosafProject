@@ -13,12 +13,12 @@ import { UseCaseAComponent } from './components/UC-A/use-case-a.component';
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'chooseUseCase',
+    redirectTo: 'Home',
     pathMatch: 'full'
   },
 
   {
-    path: 'chooseUseCase',
+    path: 'Home',
     // canActivate: [AuthGuard],
     component: GridListUCComponent,  
   },
