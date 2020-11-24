@@ -38,7 +38,7 @@ export class ToolbarComponent implements OnInit {
         //console.log(segments[i])
         switch (segments[i]) {
           case "(dashboardContent:work-area":
-            segments[i] = "Area di Lavoro"
+            segments[i] = ""
             break;
           case "agv-details":
             segments[i] = "AGV"
@@ -54,6 +54,8 @@ export class ToolbarComponent implements OnInit {
             this.path += segments[i]
           }
         }
+        else if(segments[i] =="")
+          this.path += segments[i]
         else
           this.path += segments[i] + " > "
       }

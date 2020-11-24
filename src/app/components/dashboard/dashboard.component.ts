@@ -173,7 +173,7 @@ export class DashboardComponent implements OnInit {
     this.selectedWorkArea = workArea
     //console.log(this.selectedAgv);
 
-    this.router.navigate(["Home", "use-case", `${this.useCase}`, { outlets: { dashboardContent: ["work-area", workArea.id, "agv-details", agv.id] } }]);
+    this.router.navigate(["Home", "use-case", `${this.useCase}`, { outlets: { dashboardContent: ["work-area", workArea.name, "agv-details", agv.id] } }]);
 
     //event.stopPropagation();
   }
@@ -190,7 +190,7 @@ export class DashboardComponent implements OnInit {
 
   openGraph(typeGraph: string) {
     //event.stopPropagation();
-    this.router.navigate(["Home", "use-case", `${this.useCase}`, { outlets: { dashboardContent: ["work-area", this.selectedWorkArea.id, "statistics", typeGraph] } }]);
+    this.router.navigate(["Home", "use-case", `${this.useCase}`, { outlets: { dashboardContent: ["work-area", this.selectedWorkArea.name, "statistics", typeGraph] } }]);
   }
 
 
@@ -214,7 +214,7 @@ export function calculatePercentage(tasks: Task[], workAreas: WorkArea[]) {
         if (tasks[i].task_status_id === 2)
           stat.completed++
 
-        console.log("setting", id, stat);
+        //console.log("setting", id, stat);
 
         agvIdsMap.set(id, stat)
       }
@@ -228,7 +228,7 @@ export function calculatePercentage(tasks: Task[], workAreas: WorkArea[]) {
         if (tasks[i].task_status_id === 2)
           stat.completed++
 
-          console.log("setting", id, stat);
+          //console.log("setting", id, stat);
 
         agvIdsMap.set(id, stat)
 
