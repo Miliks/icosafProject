@@ -53,12 +53,12 @@
                 <ng-template #logged>
                     <div id="logIcon" value="login-icon-selected">
                         <mat-icon svgIcon="login-icon-selected" aria-hidden="false"
-                            aria-label="Example of logged SVG icon"></mat-icon>
+                            aria-label="Example of logged SVG icon"(click)="navigateTo('Login')" ></mat-icon>
                     </div>
                 </ng-template>
                 <ng-template #unlogged>
                     <div id="logIcon" value="login-icon">
-                        <mat-icon svgIcon="login-icon" aria-hidden="false" aria-label="Example of logged SVG icon">
+                        <mat-icon svgIcon="login-icon" aria-hidden="false" aria-label="Example of logged SVG icon" (click)="navigateTo('Login')">
                         </mat-icon>
                     </div>
                 </ng-template>

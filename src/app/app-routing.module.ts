@@ -7,14 +7,20 @@ import { LoginDialogComponent } from './components/login/login-dialog/login-dial
 import { AgvDetailsComponent } from './components/agv-details/agv-details.component';
 import { StatsComponent } from './components/stats/stats.component';
 import { UseCaseAComponent } from './components/UC-A/use-case-a.component';
+import { PerimetralLoginComponent } from './components/login/perimetral-login/perimetral-login.component';
 
 
 
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'Home',
+    redirectTo: 'Login',
     pathMatch: 'full'
+  },
+
+  {
+    path: 'Login',
+    component: PerimetralLoginComponent,  
   },
 
   {
