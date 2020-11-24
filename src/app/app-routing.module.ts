@@ -37,7 +37,7 @@ const routes: Routes = [
     component: UseCaseDetailsComponent,
   },
   {
-    path: 'Home/use-case/:useCase',
+    path: 'Home/:useCase',
     component: DashboardComponent,
     children: [
       {

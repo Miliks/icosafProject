@@ -11,15 +11,15 @@ import { Task } from 'src/app/model/task.model';
 export class UCCService {
 
 
-  private _subjectSelectedWorkAreaAndAgv: Subject<number[]>;
-  public get subjectSelectedWorkAreaAndAgv(): Subject<number[]> {
+  private _subjectSelectedWorkAreaAndAgv: Subject<any[]>;
+  public get subjectSelectedWorkAreaAndAgv(): Subject<any[]> {
     return this._subjectSelectedWorkAreaAndAgv;
   }
-  public set subjectSelectedWorkAreaAndAgv(value: Subject<number[]>) {
+  public set subjectSelectedWorkAreaAndAgv(value: Subject<any[]>) {
     this._subjectSelectedWorkAreaAndAgv = value;
   }
  
-  public getSubjectSelectedWorkAreaAndAgv(): Observable<number[]> {
+  public getSubjectSelectedWorkAreaAndAgv(): Observable<any[]> {
     return this._subjectSelectedWorkAreaAndAgv.asObservable();
   }
 

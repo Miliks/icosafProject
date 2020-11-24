@@ -166,7 +166,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.useCase = this.activatedRoute.parent.snapshot.params["useCase"] 
         this.selectedAgv = params['agvId']
 
-        this.UCCService.subjectSelectedWorkAreaAndAgv.next([Number(params['workAreaId']), Number(params['agvId'])])
+        this.UCCService.subjectSelectedWorkAreaAndAgv.next([params['workAreaId'], Number(params['agvId'])])
 console.log("parametri",this.UCCService.currentOrder.order_id, params['agvId']);
 
         this.UCCService.getTaskListAgv(this.UCCService.currentOrder.order_id, Number(params['agvId'])).subscribe(tasks => {

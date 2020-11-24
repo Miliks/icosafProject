@@ -122,12 +122,12 @@ export class DashboardComponent implements OnInit {
 
           console.log(workAreaAndAgvIds);
 
-          this.selectedWorkArea = this.workAreas.find(workArea => workArea.id === workAreaAndAgvIds[0])
+          this.selectedWorkArea = this.workAreas.find(workArea => workArea.name == workAreaAndAgvIds[0])//workArea.id === workAreaAndAgvIds[0] || 
           //this.selectWorkArea(this.workAreas.find(workArea => workArea.id === workAreaAndAgvIds[0]))
           //console.log("selected is ", this.selectedWorkArea);      
           //console.log("its AGVList is ", this.selectedWorkArea.agvList);
 
-          this.openAgvDetails(this.selectedWorkArea, this.selectedWorkArea.agvList.find(agv => agv.id === workAreaAndAgvIds[1]))
+          this.openAgvDetails(this.selectedWorkArea, this.selectedWorkArea.agvList.find(agv => agv.id === workAreaAndAgvIds[1]) )
         })
 
         //TODO calcolo percentuali di risoluzione task corrente
@@ -173,7 +173,7 @@ export class DashboardComponent implements OnInit {
     this.selectedWorkArea = workArea
     //console.log(this.selectedAgv);
 
-    this.router.navigate(["Home", "use-case", `${this.useCase}`, { outlets: { dashboardContent: ["work-area", workArea.name, "agv-details", agv.id] } }]);
+    this.router.navigate(["Home", `${this.useCase}`, { outlets: { dashboardContent: ["work-area", workArea.name, "agv-details", agv.id] } }]);
 
     //event.stopPropagation();
   }
@@ -184,13 +184,13 @@ export class DashboardComponent implements OnInit {
       this.selectedWorkArea = workArea
     else {
       this.selectedWorkArea = null
-      this.router.navigate(["Home", "use-case", `${this.useCase}`])
+      this.router.navigate(["Home", `${this.useCase}`])
     }
   }
 
   openGraph(typeGraph: string) {
     //event.stopPropagation();
-    this.router.navigate(["Home", "use-case", `${this.useCase}`, { outlets: { dashboardContent: ["work-area", this.selectedWorkArea.name, "statistics", typeGraph] } }]);
+    this.router.navigate(["Home", `${this.useCase}`, { outlets: { dashboardContent: ["work-area", this.selectedWorkArea.name, "statistics", typeGraph] } }]);
   }
 
 
