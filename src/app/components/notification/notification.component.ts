@@ -16,10 +16,12 @@ export class NotificationComponent implements OnInit {
   workAreaId: string
   agvId: string
   uc: string;
+  mach_det_id: string;
   constructor(
     private router: Router,
     @Inject(MAT_DIALOG_DATA) public data, private UCCService: UCCService) {
     if (data.taskId) this.taskId = data.taskId
+    if(data.mach_det_id) this.mach_det_id = data.mach_det_id
     if (data.workAreaId) this.workAreaId = data.workAreaId
     if (data.agvId) this.agvId = data.agvId
     if (data.uc) this.uc = data.uc

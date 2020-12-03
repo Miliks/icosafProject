@@ -11,6 +11,7 @@ import { Task } from 'src/app/model/task.model';
 export class UCCService {
 
 
+
   private _subjectSelectedWorkAreaAndAgv: Subject<any[]>;
   public get subjectSelectedWorkAreaAndAgv(): Subject<any[]> {
     return this._subjectSelectedWorkAreaAndAgv;
@@ -18,7 +19,7 @@ export class UCCService {
   public set subjectSelectedWorkAreaAndAgv(value: Subject<any[]>) {
     this._subjectSelectedWorkAreaAndAgv = value;
   }
- 
+
   public getSubjectSelectedWorkAreaAndAgv(): Observable<any[]> {
     return this._subjectSelectedWorkAreaAndAgv.asObservable();
   }
@@ -55,7 +56,7 @@ export class UCCService {
     return this.http.get<Task[]>(url).pipe(retry(3))
 
   }
-  getOrdListByDateAndUC<Order>(uc: string, timestamp: string): Observable<Order[]> {    
+  getOrdListByDateAndUC<Order>(uc: string, timestamp: string): Observable<Order[]> {
     let url = `http://icowms.cloud.reply.eu/Details/getOrdListbyDate?ts=${timestamp}&uc=${uc}`
     return this.http.get<Order[]>(url).pipe(retry(3))
 
@@ -76,5 +77,17 @@ export class UCCService {
     return this.http.get<any>(url).pipe(retry(3))
 
   }
+  createTaskOper(order_id: number, oper_id: number, agv_id: number, mach_det_id: string, task_descr: string): Observable<any> {
+    let url = `http://icowms.cloud.reply.eu/Details/createTaskOper?order_id=${order_id}&oper_id=${oper_id}&agv_id=${agv_id}&match_det_id=${mach_det_id}task_descr=${task_descr}`
+    return this.http.get<any>(url).pipe(retry(3))
+  }
+
+
+  getTaskDetails(task_id: Number): Observable<any> {
+    let url = `http://icowms.cloud.reply.eu/Details/getTaskDetails?task_id=${task_id}`
+    return this.http.get<any>(url).pipe(retry(3))
+  }
+
+
 
 }

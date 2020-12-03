@@ -70,7 +70,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   opChecked: boolean = false
 
   agvOptions = ['Ritentare', 'Rimanere fermo', 'Continuo attività']
-  opOptions = [{ text: 'Richiesta intervento', val: false, dis: false }, { text: 'Richiesta interveno urgente', val: false, dis: false }]
+  opOptions = [{ text: 'Richiesta intervento', val: false, dis: false }, { text: 'Richiesta intervento urgente', val: false, dis: false }]
 
   displayedColumnsPrelievi: string[] = ['state', 'components', 'kit', 'hour', 'delay'];
   dataSourcePrelievi: MatTableDataSource<Prelievo>
@@ -83,6 +83,9 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   AGVActionSelection(actionSelected: string) {
     this.AGVActionSelected = actionSelected
+
+    if (this.AGVActionSelected == null || (this.AGVActionSelected != 'Ritentare' && this.AGVActionSelected != 'Rimanere fermo' && this.AGVActionSelected != 'Continuo attività'))
+      this.AGVActionSelected = this.agvOptions[0]
 
     if (actionSelected === this.agvOptions[1]) {
       console.log("selezionato rimanere fermo")
@@ -146,6 +149,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
       { image: "../../../assets/img/dangerIcon.svg" },
       { image: "../../../assets/img/settingIconSelected.svg" })
 
+    this.AGVActionSelection("");
 
     this.dataSourcePrelievi = new MatTableDataSource()
     this.dataSourceProblems = new MatTableDataSource()
@@ -163,21 +167,20 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.paramsSub = this.activatedRoute.params.subscribe(params => {
 
       if (params['workAreaId'] && params['agvId'] && this.activatedRoute.parent.snapshot.params["useCase"]) {
-        this.useCase = this.activatedRoute.parent.snapshot.params["useCase"] 
+        this.useCase = this.activatedRoute.parent.snapshot.params["useCase"]
         this.selectedAgv = params['agvId']
 
         this.UCCService.subjectSelectedWorkAreaAndAgv.next([params['workAreaId'], Number(params['agvId'])])
-console.log("parametri",this.UCCService.currentOrder.order_id, params['agvId']);
 
         this.UCCService.getTaskListAgv(this.UCCService.currentOrder.order_id, Number(params['agvId'])).subscribe(tasks => {
 
-          console.log(tasks);
-          
+          console.log("getTaskListAGV", tasks);
+
           let sourceProblems: Problem[] = []
           let sourcePrelievi: Prelievo[] = []
           //TODO: definire come dare settare le due data source problemi e prelievi
-          tasks.forEach((t: Task) => {
-            let task = new Task(t.task_id, t.task_descr, t.mach_det_id, t.order_id, t.start_time, t.stop_time, t.task_status_id, t.task_comment, t.agv_id, t.oper_id, t.error_time, t.component_id, t.task_type_id, t.task_ref, t.create_time)
+          tasks.forEach((t: any) => {
+            let task = new Task(t.task_id, t.task_descr, t.det_short_id, t.order_id, t.start_time, t.stop_time, t.task_status_id, t.task_comment, t.agv_id, t.oper_id, t.error_time, t.component_id, t.task_type_id, t.task_ref, t.create_time)
             switch (task.task_status_id) {
               //created
               case 1:
@@ -191,9 +194,10 @@ console.log("parametri",this.UCCService.currentOrder.order_id, params['agvId']);
                 break;
               //completed
               case 2:
+                //  console.log("STAMPA", task.computeDelayInMilliseconds())
                 sourcePrelievi.push({
                   state: task.error_time ? 4 : 2,
-                  components: `PN${task.task_id}`,
+                  components: `${task.mach_det_id}`,
                   kit: "45",
                   //   hour: task.stop_time.toLocaleTimeString('it', options)
                   hour: new Date().toLocaleTimeString('it', options),
@@ -208,7 +212,7 @@ console.log("parametri",this.UCCService.currentOrder.order_id, params['agvId']);
                 this.taskErrorId = task.task_id
                 sourceProblems.push({
                   state: 3,
-                  id: `PN${task.task_id}`,
+                  id: `${task.mach_det_id}`,
                   kit: '45',
                   //hour: task.error_time.toLocaleTimeString('it', options),
                   hour: new Date().toLocaleTimeString('it', options),
@@ -239,14 +243,16 @@ console.log("parametri",this.UCCService.currentOrder.order_id, params['agvId']);
             .getServerSentEvent("http://localhost:4200/API/events")
             .subscribe(data => {
 
-              //console.log("D.d ",data.data);
+              console.log("D.d ",data.data);
 
 
               let response = JSON.parse(data.data)
 
-              let uc:string = response.uc;
+              // console.log(response)
 
-              console.log(uc, this.useCase, response.agv_id, response.agv_id, this.selectedAgv)
+              let uc: string = response.uc;
+
+              // console.log(uc, this.useCase, response.agv_id, response.agv_id, this.selectedAgv)
 
               if (uc === this.useCase && response.agv_id !== null && response.agv_id === Number(this.selectedAgv)) {
 
@@ -262,7 +268,7 @@ console.log("parametri",this.UCCService.currentOrder.order_id, params['agvId']);
 
                   let sourcePrelievi = [...this.dataSourcePrelievi.data, {
                     state: problemFound ? 4 : 2,
-                    components: `PN${taskId}`,
+                    components: `${response.mach_det_id}`,
                     kit: "45",
                     hour: new Date().toLocaleTimeString('it', options),
                     delay: response.delay
@@ -281,7 +287,7 @@ console.log("parametri",this.UCCService.currentOrder.order_id, params['agvId']);
                     this.dataSourceProblems.data = [
                       {
                         state: 3,
-                        id: `PN${response.task_id}`,
+                        id: `${response.mach_det_id}`,
                         kit: 'Nome kit',
                         hour: new Date().toLocaleTimeString('it', options),
                         problemsFound: 'Tipologia Problema',
@@ -336,17 +342,39 @@ console.log("parametri",this.UCCService.currentOrder.order_id, params['agvId']);
 
   proceed() {
     this.UCCService.getLastActionError(15).subscribe(success => {
-      console.log(success[0].error_id);
+      //console.log(success[0].error_id);
 
-      //TODO: se la pagina viene aggiornata quando spunta la notifica, queste informazioni non sono presenti
-      // e non si sa chi è taskErrorId
-      this.UCCService.setSolveAction(this.AGVActionSelected, 1, 1, 1, success[0].error_id).subscribe(response => {
-        this.UCCService.setTaskStatusOk(Number(this.taskErrorId)).subscribe(_ => {
-          console.log("Risolvi ora", response)
-          this.taskErrorId = null
-          this.ngOnInit()
+      //TODO: modificare campi fissi e controllo azione selezionata con stringa
+
+      this.UCCService.getTaskDetails(this.taskErrorId).subscribe(res => {
+
+
+        //TODO: qui ottenere il mach det id e l'order id corrispondenti al task
+        let order_id = res[0].order_id;
+        let mach_det_id = res[0].mach_det_id
+
+        console.log("IMPOR", order_id, mach_det_id, this.selectedAgv, success[0].error_id);
+
+        this.UCCService.setSolveAction(this.AGVActionSelected, 1, Number(this.selectedAgv), 1, success[0].error_id).subscribe(response => {
+
+
+          if (this.AGVActionSelected == 'Richiesta intervento urgente' || this.AGVActionSelected == 'Richiesta intervento') {
+
+
+            this.UCCService.createTaskOper(order_id, 1, Number(this.selectedAgv), mach_det_id, "Assistenza AGV").subscribe(_ => { })
+
+          } else {
+            this.UCCService.setTaskStatusOk(Number(this.taskErrorId)).subscribe(_ => {
+              console.log("Risolvi ora", response)
+              this.taskErrorId = null
+              this.ngOnInit()
+            })
+          }
+
         })
+
       })
+
     })
   }
 

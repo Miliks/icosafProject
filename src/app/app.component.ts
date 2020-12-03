@@ -78,9 +78,11 @@ export class AppComponent implements OnInit {
       .getServerSentEvent("http://localhost:4200/API/events")
       .subscribe(response => {
 
+        //TODO vedere cosa viene ricevuto e mandare a NOTIFICATION COMPONENT il mach det it
+
         //console.log(response)
         let data = JSON.parse(response.data)
-        //console.log(data)
+        console.log("DATA",data)
         if (data.status === "NOK") {
           const dialogRef = this.dialog.open(NotificationComponent, {
             disableClose:true,
@@ -89,6 +91,7 @@ export class AppComponent implements OnInit {
             data: {
               workAreaId: data.area_id,
               taskId: data.task_id,
+              mach_det_id: data.mach_det_id,
               agvId: data.agv_id,
               uc: data.uc
             },
