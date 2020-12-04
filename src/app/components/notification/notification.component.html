@@ -2,20 +2,19 @@
     <h1 class="orangeText" mat-dialog-title>NUOVA NOTIFICA</h1>
 
     <div>
-        <p class="greyText"> AREA LAVORO AMR </p>
-        <p class="greyText"> AGV 1 </p>
-        <p class="greyText"> COMPONENTE {{mach_det_id}} </p>
+        <p class="greyText"> AREA LAVORO {{uc=="UC-A"? "CSKP":"AMR"}} </p>
+        <p class="greyText"> AGV {{ agvId }} </p>
+        <p class="greyText"> COMPONENTE {{ det_short_id }} </p>
     </div>
     <div>
         <p class="errorText">
             E' stato rilevato l'errore<span id="tipologiaErrore" class="orangeText">
-            Tipologia Errore </span>durante il prelievo del componente {{mach_det_id}}
+                Tipologia Errore </span>durante il prelievo del componente {{det_short_id}}
         </p>
     </div>
 
     <div class="actions">
-        <button  mat-dialog-close class="whiteButton" style="margin-right: 20px;"
-            mat-button>POSPONI</button>
-        <button (click)="risolviOra()"  mat-dialog-close class="darkBlueColor" mat-button>RISOLVI ORA</button>
+        <button mat-dialog-close class="whiteButton" style="margin-right: 20px;" mat-button>POSPONI</button>
+        <button (click)="risolviOra()" mat-dialog-close class="darkBlueColor" mat-button>RISOLVI ORA</button>
     </div>
 </mat-card>

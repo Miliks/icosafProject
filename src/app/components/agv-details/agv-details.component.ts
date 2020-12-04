@@ -226,7 +226,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
             sourcePrelievi = sourcePrelievi.sort((a, b) => b.hour.localeCompare(a.hour))
             this.dataSourcePrelievi.data = sourcePrelievi
 
-            this.dataSourceProblems.data = sourceProblems
+            this.dataSourceProblems.data = [...sourceProblems]
 
             this.dataSourcePrelievi.paginator = this.paginatorPrelievi
             this.dataSourcePrelievi.sort = this.matSortPrelievi
@@ -243,7 +243,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
             .getServerSentEvent("http://localhost:4200/API/events")
             .subscribe(data => {
 
-              console.log("D.d ",data.data);
+              console.log("D.d ", data.data);
 
 
               let response = JSON.parse(data.data)
@@ -258,17 +258,17 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
                 if (response.status === "OK") {
 
-                  let taskId = response.task_id
+                  let det_short_id = response.det_short_id
 
                   let problemFound = false
 
-                  let sourceProblem = this.dataSourceProblems.data.filter(problem => { problemFound = true; return problem.id !== `PN${taskId}` })
+                  let sourceProblem = this.dataSourceProblems.data.filter(problem => { problemFound = true; return problem.id !== `${det_short_id}` })
 
                   this.dataSourceProblems.data = sourceProblem
 
                   let sourcePrelievi = [...this.dataSourcePrelievi.data, {
                     state: problemFound ? 4 : 2,
-                    components: `${response.mach_det_id}`,
+                    components: `${response.det_short_id}`,
                     kit: "45",
                     hour: new Date().toLocaleTimeString('it', options),
                     delay: response.delay
@@ -287,7 +287,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.dataSourceProblems.data = [
                       {
                         state: 3,
-                        id: `${response.mach_det_id}`,
+                        id: `${response.det_short_id}`,
                         kit: 'Nome kit',
                         hour: new Date().toLocaleTimeString('it', options),
                         problemsFound: 'Tipologia Problema',
@@ -303,18 +303,25 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
               }
             })
         }
+
+
+
+        this.queryParamsSub = this.activatedRoute.queryParams.subscribe(queryParams => {
+          if (queryParams['openError']) {
+            //Se c'è errore allora lo dobbiamo far vedere
+
+            this.problemPanel.open()
+            console.log("datasourceproblems.data ", this.dataSourceProblems.data);
+
+            this.expandedElement = this.dataSourceProblems.data[0];//un solo errore
+            //this.dataSourceProblems.data.find(problem => problem.id == `${queryParams['openError']}`)
+            this.taskErrorId = Number(queryParams['openError'])
+            this.isHidingProblemHandling = false
+          }
+        })
       }
     })
 
-    this.queryParamsSub = this.activatedRoute.queryParams.subscribe(queryParams => {
-      if (queryParams['openError']) {
-        //Se c'è errore allora lo dobbiamo far vedere
-        this.problemPanel.open()
-        this.expandedElement = this.dataSourceProblems.data.find(problem => problem.id === `PN${queryParams['openError']}`)
-        this.taskErrorId = Number(queryParams['openError'])
-        this.isHidingProblemHandling = false
-      }
-    })
   }
 
   ngOnDestroy(): void {

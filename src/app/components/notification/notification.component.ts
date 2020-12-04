@@ -16,22 +16,28 @@ export class NotificationComponent implements OnInit {
   workAreaId: string
   agvId: string
   uc: string;
-  mach_det_id: string;
+  det_short_id: string;
+  nameWorkArea: string
   constructor(
     private router: Router,
     @Inject(MAT_DIALOG_DATA) public data, private UCCService: UCCService) {
     if (data.taskId) this.taskId = data.taskId
-    if(data.mach_det_id) this.mach_det_id = data.mach_det_id
+    if (data.det_short_id) this.det_short_id = data.det_short_id
     if (data.workAreaId) this.workAreaId = data.workAreaId
     if (data.agvId) this.agvId = data.agvId
     if (data.uc) this.uc = data.uc
+
+    this.nameWorkArea = this.workAreaId == "1" ? "AMR":"CSKP"
+
+
   }
+
 
   ngOnInit(): void {
   }
 
   risolviOra() {
-    this.router.navigate(["Home", "use-case", `${this.uc}`, { outlets: { dashboardContent: ["work-area", this.workAreaId, "agv-details", this.agvId] }}],{ queryParams: { openError: this.taskId } });
+    this.router.navigate(["Home", `${this.uc}`, { outlets: { dashboardContent: ["work-area", this.nameWorkArea, "agv-details", this.agvId] } }], { queryParams: { openError: this.taskId } });
   }
 
 

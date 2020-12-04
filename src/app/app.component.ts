@@ -91,7 +91,7 @@ export class AppComponent implements OnInit {
             data: {
               workAreaId: data.area_id,
               taskId: data.task_id,
-              mach_det_id: data.mach_det_id,
+              det_short_id: data.det_short_id,
               agvId: data.agv_id,
               uc: data.uc
             },
