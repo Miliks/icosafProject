@@ -25,6 +25,7 @@ export interface Problem {
   problemsFound: string;
   description: string;
   button: string;
+  task_id: Number
 }
 
 
@@ -180,7 +181,9 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
           let sourcePrelievi: Prelievo[] = []
           //TODO: definire come dare settare le due data source problemi e prelievi
           tasks.forEach((t: any) => {
-            let task = new Task(t.task_id, t.task_descr, t.det_short_id, t.order_id, t.start_time, t.stop_time, t.task_status_id, t.task_comment, t.agv_id, t.oper_id, t.error_time, t.component_id, t.task_type_id, t.task_ref, t.create_time)
+            let task = new Task(t.task_id, t.task_descr, t.det_short_id, t.order_id, t.start_time,
+              t.stop_time, t.task_status_id, t.task_comment, t.agv_id, t.oper_id, t.error_time, t.component_id,
+              t.task_type_id, t.task_ref, t.create_time)
             switch (task.task_status_id) {
               //created
               case 1:
@@ -198,7 +201,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
                 sourcePrelievi.push({
                   state: task.error_time ? 4 : 2,
                   components: `${task.mach_det_id}`,
-                  kit: "45",
+                  kit: `${task.task_descr}`,
                   //   hour: task.stop_time.toLocaleTimeString('it', options)
                   hour: new Date().toLocaleTimeString('it', options),
                   delay: task.computeDelayInMilliseconds() / 1000
@@ -209,17 +212,25 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
               case 3:
               //pending
               case 4:
-                this.taskErrorId = task.task_id
-                sourceProblems.push({
-                  state: 3,
-                  id: `${task.mach_det_id}`,
-                  kit: '45',
-                  //hour: task.error_time.toLocaleTimeString('it', options),
-                  hour: new Date().toLocaleTimeString('it', options),
-                  problemsFound: 'Tipologia Problema',
-                  button: '',
-                  description: `Problem description`,
+                // c'è un errore ricavo tipologia problema
+                this.UCCService.getLastActiveError(Number(task.task_id)).subscribe(lastActiveError => {
+                  this.taskErrorId = task.task_id
+                  sourceProblems.push({
+                    state: 3,
+                    id: `${task.mach_det_id}`,
+                    kit: `${task.task_descr}`,
+                    //hour: task.error_time.toLocaleTimeString('it', options),
+                    hour: new Date().toLocaleTimeString('it', options),
+                    problemsFound: `${lastActiveError[0].error_description}`,
+                    button: '',
+                    description: `Problem description`,
+                    task_id: this.taskErrorId
+                  })
+                  this.dataSourceProblems.data = [...sourceProblems]
+                  this.dataSourceProblems.paginator = this.paginatorErrors
                 })
+
+
                 break;
             }
 
@@ -246,19 +257,19 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
               console.log("D.d ", data.data);
 
 
-              let response = JSON.parse(data.data)
+              let event = JSON.parse(data.data)
 
               // console.log(response)
 
-              let uc: string = response.uc;
+              let uc: string = event.uc;
 
               // console.log(uc, this.useCase, response.agv_id, response.agv_id, this.selectedAgv)
 
-              if (uc === this.useCase && response.agv_id !== null && response.agv_id === Number(this.selectedAgv)) {
+              if (uc === this.useCase && event.agv_id !== null && event.agv_id === Number(this.selectedAgv)) {
 
-                if (response.status === "OK") {
+                if (event.status === "OK") {
 
-                  let det_short_id = response.det_short_id
+                  let det_short_id = event.det_short_id
 
                   let problemFound = false
 
@@ -268,10 +279,10 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
                   let sourcePrelievi = [...this.dataSourcePrelievi.data, {
                     state: problemFound ? 4 : 2,
-                    components: `${response.det_short_id}`,
-                    kit: "45",
+                    components: `${event.det_short_id}`,
+                    kit: `${event.kit_name}`,
                     hour: new Date().toLocaleTimeString('it', options),
-                    delay: response.delay
+                    delay: event.delay
                   }]
                   sourcePrelievi = sourcePrelievi.sort((a, b) => b.hour.localeCompare(a.hour))
 
@@ -281,23 +292,28 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
                   this.dataSourcePrelievi.sort = this.matSortPrelievi
 
                 } else {
-                  if (response.status === "NOK") {
+                  if (event.status === "NOK") {
 
-                    let taskId = response.task_id
-                    this.dataSourceProblems.data = [
-                      {
-                        state: 3,
-                        id: `${response.det_short_id}`,
-                        kit: 'Nome kit',
-                        hour: new Date().toLocaleTimeString('it', options),
-                        problemsFound: 'Tipologia Problema',
-                        button: '',
-                        description: `Problem description`,
-                      }
-                    ]
+                    this.UCCService.getLastActiveError(event.task_id).subscribe(lastActiveError => {
+                      console.log("lastActiveError", lastActiveError);
 
-                    this.dataSourceProblems.paginator = this.paginatorErrors
-                    this.dataSourceProblems.sort = this.matSortProblems
+                      let taskId = event.task_id
+                      this.dataSourceProblems.data = [
+                        {
+                          state: 3,
+                          id: `${event.det_short_id}`,
+                          kit: `${event.kit_name}`,
+                          hour: new Date().toLocaleTimeString('it', options),
+                          problemsFound: `${lastActiveError[0].error_description}`,
+                          button: '',
+                          description: `Problem description`,
+                          task_id: taskId
+                        }
+                      ]
+
+                      this.dataSourceProblems.paginator = this.paginatorErrors
+                      this.dataSourceProblems.sort = this.matSortProblems
+                    })
                   }
                 }
               }
@@ -348,7 +364,10 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   proceed() {
-    this.UCCService.getLastActionError(15).subscribe(success => {
+
+    // C'è sempre e solo un errore
+    let lastActiveError = this.dataSourceProblems.data[0]
+    this.UCCService.getLastActiveError(Number(lastActiveError.task_id)).subscribe(lastActiveError => {
       //console.log(success[0].error_id);
 
       //TODO: modificare campi fissi e controllo azione selezionata con stringa
@@ -360,28 +379,47 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
         let order_id = res[0].order_id;
         let mach_det_id = res[0].mach_det_id
 
-        console.log("IMPOR", order_id, mach_det_id, this.selectedAgv, success[0].error_id);
-
-        this.UCCService.setSolveAction(this.AGVActionSelected, 1, Number(this.selectedAgv), 1, success[0].error_id).subscribe(response => {
+        console.log("IMPOR", order_id, mach_det_id, this.selectedAgv, lastActiveError[0].error_id);
 
 
-          if (this.AGVActionSelected == 'Richiesta intervento urgente' || this.AGVActionSelected == 'Richiesta intervento') {
+        let solve_action_type_id: number
+        if (this.AGVActionSelected == 'Richiesta intervento urgente') {
+          solve_action_type_id = 5
+        } else {
+          if (this.AGVActionSelected == 'Richiesta intervento')
+            solve_action_type_id = 2
+          else solve_action_type_id = 1 // ritentare o continuo attività ha type id = 1
+        }
+
+        console.log("getMappingErAct",lastActiveError[0].error_type_id, solve_action_type_id);
+        
+        this.UCCService.getMappingErAct(lastActiveError[0].error_type_id, solve_action_type_id).subscribe(solveActMastIdResponse => {
+
+          console.log(solveActMastIdResponse);
+          
+          let solve_act_master_id: number = solveActMastIdResponse[0].solve_act_master_id
 
 
-            this.UCCService.createTaskOper(order_id, 1, Number(this.selectedAgv), mach_det_id, "Assistenza AGV").subscribe(_ => { })
+          console.log("insertSolveAction", this.AGVActionSelected, 1, Number(this.selectedAgv), solve_act_master_id, lastActiveError[0].error_id, this.AGVActionSelected == 'Richiesta intervento urgente' ? 1 : 2);
 
-          } else {
-            this.UCCService.setTaskStatusOk(Number(this.taskErrorId)).subscribe(_ => {
-              console.log("Risolvi ora", response)
-              this.taskErrorId = null
-              this.ngOnInit()
-            })
-          }
+          this.UCCService.setSolveAction(this.AGVActionSelected, 1, Number(this.selectedAgv), solve_act_master_id, lastActiveError[0].error_id, this.AGVActionSelected == 'Richiesta intervento urgente' ? 1 : 2).subscribe(response => {
 
+
+
+            if (this.AGVActionSelected == 'Richiesta intervento urgente' || this.AGVActionSelected == 'Richiesta intervento') {
+
+              this.UCCService.createTaskOper(order_id, 1, Number(this.selectedAgv), mach_det_id, "Assistenza AGV").subscribe(_ => { })
+
+            } else {
+              this.UCCService.setTaskStatusOk(Number(this.taskErrorId)).subscribe(_ => {
+                console.log("Risolvi ora", response)
+                this.taskErrorId = null
+                this.ngOnInit()
+              })
+            }
+          })
         })
-
       })
-
     })
   }
 

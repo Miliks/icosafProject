@@ -24,7 +24,7 @@
                                             </mat-icon>
                                         </span>
                                         AGV {{workArea.id}}.{{agv.id}} </p>
-                                    <div style="width: 100%;">
+                                    <div style="width: 100%; z-index: 3;">
                                         <mat-progress-bar #progressVal mode="determinate" [value]="agv.getProgress()">
                                         </mat-progress-bar>
                                         <span class="percentageProgressBar"

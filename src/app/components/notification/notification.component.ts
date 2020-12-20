@@ -1,6 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
 import { UCCService } from 'src/app/services/UC-C/uc-c-service.service';
 
 @Component({
@@ -18,6 +19,7 @@ export class NotificationComponent implements OnInit {
   uc: string;
   det_short_id: string;
   nameWorkArea: string
+  error_description: string
   constructor(
     private router: Router,
     @Inject(MAT_DIALOG_DATA) public data, private UCCService: UCCService) {
@@ -27,7 +29,11 @@ export class NotificationComponent implements OnInit {
     if (data.agvId) this.agvId = data.agvId
     if (data.uc) this.uc = data.uc
 
-    this.nameWorkArea = this.workAreaId == "1" ? "AMR":"CSKP"
+    this.UCCService.getLastActiveError(Number(this.taskId)).subscribe(lastActiveErrorResp => {
+      this.error_description = lastActiveErrorResp[0].error_description
+    })
+
+    this.nameWorkArea = this.workAreaId == "1" ? "AMR" : "CSKP"
 
 
   }

@@ -15,14 +15,7 @@ export class StatsComponent implements OnInit {
 
 
   constructor() {
-
-
-
-
   }
-
-
-
 
   ngOnInit() {
     let chart = new CanvasJS.Chart("chartContainer", {
@@ -30,16 +23,13 @@ export class StatsComponent implements OnInit {
       animationEnabled: true,
       exportEnabled: true,
       title: {
-        text: "STATS"
+        text: "Statistics"
       },
       subtitles: [{
         text: "Try Zooming and Panning"
       }],
       axisY: {
-        title: "Humidity[%]",
-      },
-      axisY2: {
-        title: "Temperature[C]", //TODO: definire unità 
+        title: "Fulfillment[%]",
       },
       legend: {
         cursor: "pointer",
@@ -53,10 +43,10 @@ export class StatsComponent implements OnInit {
       data: [
         {
           type: "line",
-          name: "Humidity",
+          name: "fulfillment",
           axisYType: "primary",
           showInLegend: true,
-          dataPoints: [{ x: 1, y: 2 } as Point, { x: 3, y: 5 } as Point]
+          dataPoints: [{ x: 1, y: 10 } as Point, { x: 2, y: 20 } as Point,{ x: 3, y: 45 } as Point,{ x: 4, y: 80 } as Point]
         },
       ]
     });

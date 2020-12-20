@@ -65,6 +65,9 @@ export class AppComponent implements OnInit {
     iconRegistry.addSvgIcon(
       'login-icon-selected',
       sanitizer.bypassSecurityTrustResourceUrl('assets/img/loginIconSelected.svg'));
+    iconRegistry.addSvgIcon(
+      'error-solved',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/img/errorSolved.svg'));
   }
   ngAfterViewInit(): void {
   }
@@ -72,20 +75,20 @@ export class AppComponent implements OnInit {
   ngOnInit() {
 
 
-    
+
     console.log("Contacting events...")
     this.sseService
       .getServerSentEvent("http://localhost:4200/API/events")
       .subscribe(response => {
 
         //TODO vedere cosa viene ricevuto e mandare a NOTIFICATION COMPONENT il mach det it
-
         //console.log(response)
         let data = JSON.parse(response.data)
-        console.log("DATA",data)
-        if (data.status === "NOK") {
+        console.log("DATA", data)
+        if (data.status == "NOK") {
+
           const dialogRef = this.dialog.open(NotificationComponent, {
-            disableClose:true,
+            disableClose: true,
             width: 'auto',
             height: 'auto',
             data: {
@@ -129,7 +132,7 @@ export class AppComponent implements OnInit {
     else {
       // seleziono logList
       if (!this.logIconSelected) {
-//        this.openDialog()
+        //        this.openDialog()
         this.logIconSelected = true
       }
       this.iconList.deselectAll()
