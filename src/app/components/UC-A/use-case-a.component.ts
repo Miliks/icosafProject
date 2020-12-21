@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { UCAService } from 'src/app/services/UC-A/uca.service';
 
 @Component({
   selector: 'app-use-case-a',
@@ -8,7 +7,7 @@ import { UCAService } from 'src/app/services/UC-A/uca.service';
 })
 export class UseCaseAComponent implements OnInit {
 
-  constructor(private UCAService : UCAService) { }
+  constructor() { }
 
   ngOnInit(): void {
   }

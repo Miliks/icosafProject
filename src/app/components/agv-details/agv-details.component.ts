@@ -391,12 +391,12 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
           else solve_action_type_id = 1 // ritentare o continuo attività ha type id = 1
         }
 
-        console.log("getMappingErAct",lastActiveError[0].error_type_id, solve_action_type_id);
-        
+        console.log("getMappingErAct", lastActiveError[0].error_type_id, solve_action_type_id);
+
         this.UCCService.getMappingErAct(lastActiveError[0].error_type_id, solve_action_type_id).subscribe(solveActMastIdResponse => {
 
           console.log(solveActMastIdResponse);
-          
+
           let solve_act_master_id: number = solveActMastIdResponse[0].solve_act_master_id
 
 
@@ -404,18 +404,16 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
           this.UCCService.setSolveAction(this.AGVActionSelected, 1, Number(this.selectedAgv), solve_act_master_id, lastActiveError[0].error_id, this.AGVActionSelected == 'Richiesta intervento urgente' ? 1 : 2).subscribe(response => {
 
-
-
-            if (this.AGVActionSelected == 'Richiesta intervento urgente' || this.AGVActionSelected == 'Richiesta intervento') {
-
-              this.UCCService.createTaskOper(order_id, 1, Number(this.selectedAgv), mach_det_id, "Assistenza AGV").subscribe(_ => { })
-
-            } else {
+            // Se non si da il caso che sia una richiesta ad operatore allora invia la risoluzione
+            if (this.AGVActionSelected != 'Rimanere fermo') {
               this.UCCService.setTaskStatusOk(Number(this.taskErrorId)).subscribe(_ => {
-                console.log("Risolvi ora", response)
+                console.log("Risolvi ora", this.AGVActionSelected, response)
                 this.taskErrorId = null
                 this.ngOnInit()
               })
+            }else{
+              // Se è stata effettuata la chiamata ad operatore allora il task dovrebbe essere messo in pending
+              //TODO: rimuovere da errore e spostare in pending
             }
           })
         })

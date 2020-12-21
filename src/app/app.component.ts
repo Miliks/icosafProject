@@ -140,13 +140,8 @@ export class AppComponent implements OnInit {
     return list.selectedOptions.selected[0].value
   }
 
-
-
-
   navigateTo(url: string) {
     this.router.navigate([url])
-
   }
-
 
 }
