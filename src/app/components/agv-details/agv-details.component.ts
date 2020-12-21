@@ -404,6 +404,9 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
           this.UCCService.setSolveAction(this.AGVActionSelected, 1, Number(this.selectedAgv), solve_act_master_id, lastActiveError[0].error_id, this.AGVActionSelected == 'Richiesta intervento urgente' ? 1 : 2).subscribe(response => {
 
+            //INSERTSOLVEACTION EFFETTUATA
+            console.log("INSERTSOLVEACTION EFFETTUATA");
+            
             // Se non si da il caso che sia una richiesta ad operatore allora invia la risoluzione
             if (this.AGVActionSelected != 'Rimanere fermo') {
               this.UCCService.setTaskStatusOk(Number(this.taskErrorId)).subscribe(_ => {
