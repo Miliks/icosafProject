@@ -1,3 +1,7 @@
+/**
+ * Component not used in this context, but added for managing the activity of the shop floor operator.
+ * Nevertheless is only a mock definition because no functionality was implemented
+ */
 import { Component, OnInit } from '@angular/core';
 
 @Component({

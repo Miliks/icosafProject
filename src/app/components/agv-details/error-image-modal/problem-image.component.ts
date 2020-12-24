@@ -1,3 +1,9 @@
+/**
+ * Component that shows the carousel with the images related to the encountered errors during the process
+ * For the moment there are only mock images
+ * 23/12/20
+ */
+
 import { Component, OnInit, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
@@ -16,14 +22,14 @@ export class ProblemImageComponent implements OnInit {
     this.slides = []
 
     if (data.images)
-    this.slides = [...data.images]
-    
+      this.slides = [...data.images]
+
   }
 
   ngOnInit(): void {
   }
 
-  closeDialog(){
+  closeDialog() {
     this.dialogRef.close()
   }
 }

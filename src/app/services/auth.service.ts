@@ -10,14 +10,10 @@ import * as CryptoJS from 'crypto-js';
 export class AuthService {
 
   constructor(private http: HttpClient) {
-
   }
-
-
 
   login(username: string, password: string): Observable<any> {
     
-
     var encrypted = CryptoJS.AES.encrypt(password, "my-secret");
 
     console.log(encrypted.toString());
@@ -26,7 +22,6 @@ export class AuthService {
 
     return this.http.post<any>(URL, { login: username, pwd: encrypted.toString() });
   }
-
 
   isLogged() {
     if (localStorage.getItem("session"))

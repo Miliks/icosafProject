@@ -1,3 +1,6 @@
+/**
+ * Component with the grid for choosing the use case
+ */
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 

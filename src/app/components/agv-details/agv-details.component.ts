@@ -1,7 +1,12 @@
-import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+/**
+ * Component that is shown on the right side of the screen with the two panels.
+ * Here is managed all the related logic
+ * 24/12/20
+ */
+
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { ProblemModalComponent } from '../UCDetails/modal/problem-modal.component';
 import { MatTableDataSource } from '@angular/material/table';
 import { ProblemImageComponent, Slide } from './error-image-modal/problem-image.component';
 import { SseService } from 'src/app/services/SseService/sse-service.service';
@@ -9,14 +14,16 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatPaginator } from '@angular/material/paginator';
 import { Subscription } from 'rxjs';
 import { UCCService } from 'src/app/services/UC-C/uc-c-service.service';
-import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
-import { Order } from 'src/app/model/order.model';
+import { MatRadioGroup } from '@angular/material/radio';
 import { MatSort } from '@angular/material/sort';
 import { MatExpansionPanel } from '@angular/material/expansion';
 import { Task } from 'src/app/model/task.model';
 
 
+// Options used to show the timestamp with the following format
 const options = { hour: "numeric", minute: "numeric", second: "numeric" }
+
+// Element in the problems panel
 export interface Problem {
   state: number; // 0 nessun problema or problema risolto // 1 problema // 2 componente non ancora considerato //3 loading
   id: string;
@@ -28,7 +35,7 @@ export interface Problem {
   task_id: Number
 }
 
-
+// Element in the Prelievi panel
 interface Prelievo {
   state: number;
   components: string
@@ -52,16 +59,14 @@ interface Prelievo {
 })
 export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
-  @ViewChild('problemPanel', { static: false }) problemPanel: MatExpansionPanel
-
   sseSub: Subscription
 
+  @ViewChild('problemPanel', { static: false }) problemPanel: MatExpansionPanel
   @ViewChild('matSortProblems') matSortProblems: MatSort;
   @ViewChild('matSortPrelievi') matSortPrelievi: MatSort;
-
-
   @ViewChild("OperatorSelection") opSelection: MatRadioGroup
   @ViewChild("AGVActionSelected") AGVsel: MatRadioGroup
+
   dataSourceProblems: MatTableDataSource<Problem>
   displayedColumnsProblems = ['state', 'id', 'kit', 'problemsFound', 'button', 'hour'];
   expandedElement: Problem | null;
@@ -81,44 +86,13 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   useCase: string;
   selectedAgv: string;
 
-
-  AGVActionSelection(actionSelected: string) {
-    this.AGVActionSelected = actionSelected
-
-    if (this.AGVActionSelected == null || (this.AGVActionSelected != 'Ritentare' && this.AGVActionSelected != 'Rimanere fermo' && this.AGVActionSelected != 'Continuo attività'))
-      this.AGVActionSelected = this.agvOptions[0]
-
-    if (actionSelected === this.agvOptions[1]) {
-      console.log("selezionato rimanere fermo")
-      if (!this.opOptions.find(o => o.val == true))
-        this.opOptions[0].val = true
-      for (let op of this.opOptions) {
-        op.dis = false
-      }
-      console.log("Changed now")
-    }
-    else {
-      console.log("selezionato altro")
-      for (let op of this.opOptions) {
-        op.val = false
-        op.dis = true
-      }
-    }
-  }
-  OpActionSelection(opSel) {
-    if (!opSel.dis) {
-      for (let op of this.opOptions)
-        if (opSel != op) op.val = false
-      //this.opOptions.find(o=>o!=opSel).val = false
-      this.opOptions.find(o => o == opSel).val = true
-    }
-  }
-
   private _paginatorPrelievi: MatPaginator;
   paramsSub: Subscription;
+
   public get paginatorPrelievi(): MatPaginator {
     return this._paginatorPrelievi;
   }
+
   @ViewChild('paginatorPrelievi')
   public set paginatorPrelievi(value: MatPaginator) {
     this._paginatorPrelievi = value;
@@ -141,7 +115,6 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     public imageDialog: MatDialog,
     private sseService: SseService,
     private UCCService: UCCService,
-    private router: Router,
     private activatedRoute: ActivatedRoute) {
 
     this.isHidingProblemHandling = true
@@ -347,6 +320,38 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.sseSub = null
   }
 
+  AGVActionSelection(actionSelected: string) {
+    this.AGVActionSelected = actionSelected
+
+    if (this.AGVActionSelected == null || (this.AGVActionSelected != 'Ritentare' && this.AGVActionSelected != 'Rimanere fermo' && this.AGVActionSelected != 'Continuo attività'))
+      this.AGVActionSelected = this.agvOptions[0]
+
+    if (actionSelected === this.agvOptions[1]) {
+      console.log("selezionato rimanere fermo")
+      if (!this.opOptions.find(o => o.val == true))
+        this.opOptions[0].val = true
+      for (let op of this.opOptions) {
+        op.dis = false
+      }
+      console.log("Changed now")
+    }
+    else {
+      console.log("selezionato altro")
+      for (let op of this.opOptions) {
+        op.val = false
+        op.dis = true
+      }
+    }
+  }
+
+  OpActionSelection(opSel) {
+    if (!opSel.dis) {
+      for (let op of this.opOptions)
+        if (opSel != op) op.val = false
+      //this.opOptions.find(o=>o!=opSel).val = false
+      this.opOptions.find(o => o == opSel).val = true
+    }
+  }
 
   headerOfColumn(column: string) {
     switch (column) {
@@ -363,6 +368,9 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Method called whenever the "RISOLVI" button is called
+   */
   proceed() {
 
     // C'è sempre e solo un errore
@@ -406,7 +414,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
             //INSERTSOLVEACTION EFFETTUATA
             console.log("INSERTSOLVEACTION EFFETTUATA");
-            
+
             // Se non si da il caso che sia una richiesta ad operatore allora invia la risoluzione
             if (this.AGVActionSelected != 'Rimanere fermo') {
               this.UCCService.setTaskStatusOk(Number(this.taskErrorId)).subscribe(_ => {
@@ -414,7 +422,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.taskErrorId = null
                 this.ngOnInit()
               })
-            }else{
+            } else {
               // Se è stata effettuata la chiamata ad operatore allora il task dovrebbe essere messo in pending
               //TODO: rimuovere da errore e spostare in pending
             }
@@ -424,6 +432,10 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     })
   }
 
+  /**
+   * Method called when the user clicks on RISOLVI to open and see the possible action that can be performed in order to solve it
+   * @param element 
+   */
   solve(element: Problem) {
     event.stopPropagation();
     //this.dialog.open(ProblemModalComponent);
@@ -431,6 +443,10 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.expandedElement = element
   }
 
+  /**
+   * Method to open the carousel where the images related to the errors encountered are shown
+   * @param imageSrc 
+   */
   openImage(imageSrc: Slide) {
     console.log(imageSrc)
     const dialogConfig = new MatDialogConfig();

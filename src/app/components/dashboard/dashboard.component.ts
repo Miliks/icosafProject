@@ -1,4 +1,9 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+/**
+ * Component used to show the composition of the work Areas
+ * For the composition is hardcoded but it should be get from the backend whenever the methods will be implemented
+ * 24/12/20
+ */
+import { Component, OnInit } from '@angular/core';
 import { WorkArea } from 'src/app/model/work-area.model';
 import { Agv } from 'src/app/model/agv.model';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -8,7 +13,6 @@ import { UCCService } from 'src/app/services/UC-C/uc-c-service.service';
 import { Order } from 'src/app/model/order.model';
 import { Task } from 'src/app/model/task.model';
 import { SseService } from 'src/app/services/SseService/sse-service.service';
-import { LoginDialogComponent } from '../login/login-dialog/login-dialog.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -30,39 +34,11 @@ export class DashboardComponent implements OnInit {
   stateSat: string
   stateCycleTime: string
   useCase: string;
-
-  expandPanel(expPanel, state) {
-    expPanel.toggle()
-    this.rotate(state)
-  }
-
-  rotate(state: string) {
-
-
-    switch (state) {
-      case 'stateSat':
-        this.stateSat = (this.stateSat === 'collapsed' ? 'expanded' : 'collapsed');
-        break;
-      case 'stateJPH':
-        this.stateJPH = (this.stateJPH === 'collapsed' ? 'expanded' : 'collapsed');
-
-        break;
-      case 'stateCycleTime':
-        this.stateCycleTime = (this.stateCycleTime === 'collapsed' ? 'expanded' : 'collapsed');
-
-        break;
-
-      default:
-        break;
-    }
-  }
-
   workAreas: WorkArea[]
   progress: number
 
   selectedWorkArea: WorkArea
   selectedAgv: Agv
-
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -70,16 +46,12 @@ export class DashboardComponent implements OnInit {
     private router: Router,
     private UCCService: UCCService) {
 
-
-
-
     this.stateJPH = 'collapsed';
     this.stateSat = 'collapsed'
     this.stateCycleTime = 'collapsed'
 
     this.progress = 75
     this.workAreas = []
-
 
   }
 
@@ -90,12 +62,10 @@ export class DashboardComponent implements OnInit {
       if (params['useCase']) {
         this.useCase = params['useCase']
 
-        let w1_2 = this.useCase === "UC-C" ? new WorkArea(1, "AMR", [new Agv(1),new Agv(2)]) : new WorkArea(2, "CSKP", [new Agv(3), new Agv(4), new Agv(5), new Agv(6)])
+        let w1_2 = this.useCase === "UC-C" ? new WorkArea(1, "AMR", [new Agv(1), new Agv(2)]) : new WorkArea(2, "CSKP", [new Agv(3), new Agv(4), new Agv(5), new Agv(6)])
         //   let w3 = new WorkArea(3, "3", [new Agv(10), new Agv(11)])
         //   let w4 = new WorkArea(4, "4", [new Agv(12), new Agv(13)])
         //   let w5 = new WorkArea(5, "5", [new Agv(8), new Agv(9)])
-
-
 
         //    w5.agvList[0].setProgress(100)
         //    w5.agvList[1].setProgress(52)
@@ -117,7 +87,6 @@ export class DashboardComponent implements OnInit {
           this.openAgvDetails(this.selectedWorkArea, this.selectedWorkArea.agvList[0]);
         }
 
-        //TODO remove timestamp hardcoded
         this.UCCService.getSubjectSelectedWorkAreaAndAgv().subscribe(workAreaAndAgvIds => {
 
           console.log(workAreaAndAgvIds);
@@ -127,14 +96,15 @@ export class DashboardComponent implements OnInit {
           //console.log("selected is ", this.selectedWorkArea);      
           //console.log("its AGVList is ", this.selectedWorkArea.agvList);
 
-          this.openAgvDetails(this.selectedWorkArea, this.selectedWorkArea.agvList.find(agv => agv.id === workAreaAndAgvIds[1]) )
+          this.openAgvDetails(this.selectedWorkArea, this.selectedWorkArea.agvList.find(agv => agv.id === workAreaAndAgvIds[1]))
         })
 
-        //TODO calcolo percentuali di risoluzione task corrente
+        //TODO remove timestamp hardcoded
         this.UCCService.getOrdListByDateAndUC(this.useCase, "2020-07-24").subscribe((orders: Order[]) => {
 
           //Ottengo il primo ordine non terminato e definisco questo come ordine corrente
           this.UCCService.currentOrder = orders.find(order => order.order_ts_end == null)
+
           //salvo nella sessione currentOrder
           localStorage.setItem('currentOrder', JSON.stringify(this.UCCService.currentOrder));
 
@@ -147,6 +117,9 @@ export class DashboardComponent implements OnInit {
           })
         })
 
+        /**
+         * Subscription to the source of events
+         */
         this.sseService
           .getServerSentEvent("http://localhost:4200/API/events")
           .subscribe(data => {
@@ -167,6 +140,46 @@ export class DashboardComponent implements OnInit {
 
 
 
+  /**
+   * Custom method to manage the expansion of the panel related to the stats as the designer told us
+   * @param expPanel 
+   * @param state 
+   */
+  expandPanel(expPanel, state) {
+    expPanel.toggle()
+    this.rotate(state)
+  }
+
+  /**
+   * Custom method to manage the view of the stats
+   * @param state 
+   */
+  rotate(state: string) {
+
+    switch (state) {
+      case 'stateSat':
+        this.stateSat = (this.stateSat === 'collapsed' ? 'expanded' : 'collapsed');
+        break;
+      case 'stateJPH':
+        this.stateJPH = (this.stateJPH === 'collapsed' ? 'expanded' : 'collapsed');
+
+        break;
+      case 'stateCycleTime':
+        this.stateCycleTime = (this.stateCycleTime === 'collapsed' ? 'expanded' : 'collapsed');
+
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Open the details of the agv by navigating with the named outlet as it follow
+   * It will be opened the AGVDetailsComponent
+   * @param workArea 
+   * @param agv 
+   */
   openAgvDetails(workArea: WorkArea, agv: Agv) {
 
     this.selectedAgv = agv
@@ -178,6 +191,11 @@ export class DashboardComponent implements OnInit {
     //event.stopPropagation();
   }
 
+  /**
+   * Method to select the workArea and correspondingly navigate to the see the details of the workArea related to the use case.
+   * Dashboard component will be loaded
+   * @param workArea 
+   */
   selectWorkArea(workArea: WorkArea) {
     this.selectedAgv = null
     if (this.selectedWorkArea == null)
@@ -188,6 +206,10 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  /**
+   * Method to show the mock stats
+   * @param typeGraph 
+   */
   openGraph(typeGraph: string) {
     //event.stopPropagation();
     this.router.navigate(["Home", `${this.useCase}`, { outlets: { dashboardContent: ["work-area", this.selectedWorkArea.name, "statistics", typeGraph] } }]);
@@ -195,14 +217,19 @@ export class DashboardComponent implements OnInit {
 
 
 }
-export function calculatePercentage(tasks: Task[], workAreas: WorkArea[]) {
 
+/**
+ * Method to compute the percentage of fulfillment of the cobots composing the workingAreas.
+ * Called whenever an event occur
+ * @param tasks 
+ * @param workAreas 
+ */
+export function calculatePercentage(tasks: Task[], workAreas: WorkArea[]) {
 
   let agvIdsMap = new Map<Number, Statistics>()
 
   for (let i = 0; i < tasks.length; i++) {
     let id = tasks[i].agv_id
-
 
     if (id) {
       if (!agvIdsMap.has(id)) {
@@ -215,7 +242,6 @@ export function calculatePercentage(tasks: Task[], workAreas: WorkArea[]) {
           stat.completed++
 
         //console.log("setting", id, stat);
-
         agvIdsMap.set(id, stat)
       }
       else {
@@ -228,7 +254,7 @@ export function calculatePercentage(tasks: Task[], workAreas: WorkArea[]) {
         if (tasks[i].task_status_id === 2)
           stat.completed++
 
-          //console.log("setting", id, stat);
+        //console.log("setting", id, stat);
 
         agvIdsMap.set(id, stat)
 
@@ -239,23 +265,25 @@ export function calculatePercentage(tasks: Task[], workAreas: WorkArea[]) {
   let agv
   let wa
 
-  console.log("WA", workAreas)
+  // console.log("WA", workAreas)
 
   for (let id of agvIdsMap.keys()) {
-    console.log("ID", id);
+    // console.log("ID", id);
 
     wa = workAreas.find(wa => {
       agv = wa.agvList.find(a => a.id == id)
       return agv !== undefined
     })
+
     let currentStat = agvIdsMap.get(id)
+    
     wa.agvList.find(a => a.id == id).setProgress(currentStat.completed * 100 / currentStat.total)
+    
     wa.agvList.find(a => a.id == id).setError(currentStat.error)
+  
   }
-
-
-
 }
+
 interface Statistics {
   completed: number,
   total: number,

@@ -1,5 +1,3 @@
-import { WorkArea } from './work-area.model';
-
 export class Agv {
     private progress = 0
     private error = false
