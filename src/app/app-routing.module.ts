@@ -29,7 +29,7 @@ const routes: Routes = [
     component: GridListUCComponent,  
   },
   {
-    path:'UseCaseA',
+    path:'fieldOperator',
     component: UseCaseAComponent
   },
   {

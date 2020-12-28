@@ -65,6 +65,11 @@ export class UCCService {
     return this.http.get<Task[]>(url).pipe(retry(3))
   }
 
+  getTaskListOper<Task>(order_id: Number, oper_id: Number): Observable<Task[]> {
+    let url = `http://icowms.cloud.reply.eu/Details/getTaskListOper?order_id=${order_id}&oper_id=${oper_id}`
+    return this.http.get<Task[]>(url).pipe(retry(3))
+  }
+
   /**
    * Call to the backend in order to get the list of tasks given the order id
    * @param order_id 
