@@ -1,0 +1,12 @@
+<div class="flexCenter">
+    <div>
+        <p>Tipologia Errore: {{typeofError}}</p>
+        <p> Errore riscontrato su cobot: {{cobotName}}</p>
+        <p>Urgenza: {{severity}}</p>
+    </div>
+
+    <button mat-raised-button color="primary" style="margin-right: 40px;" (click)="ok()">OK</button>
+    <button mat-raised-button color="warn" (click)="notOK()">NOT OK</button>
+
+</div>
+

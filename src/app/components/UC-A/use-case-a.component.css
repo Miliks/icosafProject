@@ -5,6 +5,18 @@
     margin-top: 20px;
 }
 
+h1{
+    text-align: center;
+}
+
 table {
-    width: 80%;
-  } 
+    width: 100%;
+}
+.tableCentered{
+
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    margin-left: 15%;
+} 

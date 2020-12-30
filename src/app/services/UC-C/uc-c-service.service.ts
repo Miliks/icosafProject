@@ -17,6 +17,7 @@ export class UCCService {
 
 
 
+
   // The subject is used to communicate data among non related components, in particular the name of the workArea and the AGV
   private _subjectSelectedWorkAreaAndAgv: Subject<any[]>;
 
@@ -96,6 +97,11 @@ export class UCCService {
    */
   setTaskStatusOk(task_id: number) {
     let url = `http://icowms.cloud.reply.eu/Details/updateStatusOK?task_id=${task_id}`
+    return this.http.get<any>(url).pipe(retry(3))
+  }
+  
+  setTaskStatusNotOk(taskId: number,errorTypeId:number) {
+    let url = `http://icowms.cloud.reply.eu/Details/updateStatusEr?task_id=${taskId}&error_type_id=${errorTypeId}`
     return this.http.get<any>(url).pipe(retry(3))
   }
 

@@ -43,6 +43,7 @@ import {MatPaginatorModule} from '@angular/material/paginator';
 import { NotificationComponent } from './components/notification/notification.component';
 import { UseCaseAComponent } from './components/UC-A/use-case-a.component';
 import { PerimetralLoginComponent } from './components/login/perimetral-login/perimetral-login.component';
+import { NotificationFieldOperatorComponent } from './components/UC-A/fieldOperatorNotification/notification-field-operator.component';
 
 @NgModule({
   declarations: [
@@ -59,6 +60,7 @@ import { PerimetralLoginComponent } from './components/login/perimetral-login/pe
     NotificationComponent,
     UseCaseAComponent,
     PerimetralLoginComponent,
+    NotificationFieldOperatorComponent,
   ],
   imports: [
     BrowserModule,
