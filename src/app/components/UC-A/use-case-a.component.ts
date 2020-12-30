@@ -6,6 +6,7 @@ import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
+import { Subscription } from 'rxjs';
 import { SseService } from 'src/app/services/SseService/sse-service.service';
 import { UCCService } from 'src/app/services/UC-C/uc-c-service.service';
 import { NotificationFieldOperatorComponent } from './fieldOperatorNotification/notification-field-operator.component';
@@ -24,10 +25,14 @@ interface TaskFieldOperator {
 export class UseCaseAComponent implements OnInit, AfterViewInit {
 
   currentTask: string
+  taskOperList: any[]
   displayedColumns: string[] = ['status', 'det_short_id'];
   dataSource: MatTableDataSource<TaskFieldOperator>;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
+
+  sseSubscription: Subscription;
+  sseSubscriptionEvent: any;
 
   constructor(private sseService: SseService, private UCCService: UCCService, public dialog: MatDialog) {
     this.dataSource = new MatTableDataSource<TaskFieldOperator>()
@@ -36,8 +41,10 @@ export class UseCaseAComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
 
-    //TODO richiedere per primo order non completo
+    //TODO richiedere per primo order non completo con oper id loggato per il momento è 1 
     this.UCCService.getTaskListOper(1, 1).subscribe((response: any[]) => {
+
+      this.taskOperList = response
 
       if (response.length != 0) {
         this.currentTask = response[0].task_descr.toString()
@@ -61,7 +68,7 @@ export class UseCaseAComponent implements OnInit, AfterViewInit {
     /**
      * Subscription to the source of events
      */
-    this.sseService
+    this.sseSubscription = this.sseSubscription ? this.sseService
       .getServerSentEvent("http://localhost:4200/API/solve_action")
       .subscribe(data => {
 
@@ -82,11 +89,21 @@ export class UseCaseAComponent implements OnInit, AfterViewInit {
           },
           panelClass: "zeroPaddingModal"
         })
+      }) : null
 
 
 
+    this.sseSubscriptionEvent = this.sseService
+      .getServerSentEvent("http://localhost:4200/API/events")
+      .subscribe(response => {
+
+        //TODO vedere cosa viene ricevuto e mandare a NOTIFICATION COMPONENT il mach det it
+        //console.log(response)
+        let data = JSON.parse(response.data)
+        console.log("DATA", data)
+        if (data.task == "NOK") { }
+      
       })
-
   }
 
   ngAfterViewInit() {
