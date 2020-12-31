@@ -108,7 +108,7 @@ export class UCCService {
   /**
    * Call to define the solve action to be performed whenever the operator is called in order to solve the problem rose during the process
    * @param solve_action_text: Action text selected 
-   * @param operator_ass_id: for the moment 1
+   * @param operator_ass_id: for the moment 2
    * @param cobot_id
    * @param solve_act_mast_id: can be obtained from the error type id and the solve action type id
    * @param error_id

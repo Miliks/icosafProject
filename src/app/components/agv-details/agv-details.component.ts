@@ -408,9 +408,9 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
           let solve_act_master_id: number = solveActMastIdResponse[0].solve_act_master_id
 
 
-          console.log("insertSolveAction", this.AGVActionSelected, 1, Number(this.selectedAgv), solve_act_master_id, lastActiveError[0].error_id, this.AGVActionSelected == 'Richiesta intervento urgente' ? 1 : 2);
+          console.log("insertSolveAction", this.AGVActionSelected, 2, Number(this.selectedAgv), solve_act_master_id, lastActiveError[0].error_id, this.AGVActionSelected == 'Richiesta intervento urgente' ? 1 : 2);
 
-          this.UCCService.setSolveAction(this.AGVActionSelected, 1, Number(this.selectedAgv), solve_act_master_id, lastActiveError[0].error_id, this.AGVActionSelected == 'Richiesta intervento urgente' ? 1 : 2).subscribe(response => {
+          this.UCCService.setSolveAction(this.AGVActionSelected, 2, Number(this.selectedAgv), solve_act_master_id, lastActiveError[0].error_id, this.AGVActionSelected == 'Richiesta intervento urgente' ? 1 : 2).subscribe(response => {
 
             //INSERTSOLVEACTION EFFETTUATA
             console.log("INSERTSOLVEACTION EFFETTUATA");
@@ -425,6 +425,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
             } else {
               // Se è stata effettuata la chiamata ad operatore allora il task dovrebbe essere messo in pending
               //TODO: rimuovere da errore e spostare in pending
+              this.dataSourceProblems.data[0]
             }
           })
         })

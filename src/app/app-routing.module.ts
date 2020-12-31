@@ -8,7 +8,6 @@ import { UseCaseDetailsComponent } from './components/UCDetails/use-case-details
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { AgvDetailsComponent } from './components/agv-details/agv-details.component';
 import { StatsComponent } from './components/stats/stats.component';
-import { UseCaseAComponent } from './components/UC-A/use-case-a.component';
 import { PerimetralLoginComponent } from './components/login/perimetral-login/perimetral-login.component';
 
 const routes: Routes = [
@@ -27,10 +26,6 @@ const routes: Routes = [
     path: 'Home',
     // canActivate: [AuthGuard],
     component: GridListUCComponent,  
-  },
-  {
-    path:'fieldOperator',
-    component: UseCaseAComponent
   },
   {
     path: 'use-case-details',
