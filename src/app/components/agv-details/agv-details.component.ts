@@ -18,6 +18,7 @@ import { MatRadioGroup } from '@angular/material/radio';
 import { MatSort } from '@angular/material/sort';
 import { MatExpansionPanel } from '@angular/material/expansion';
 import { Task } from 'src/app/model/task.model';
+import { Order } from 'src/app/model/order.model';
 
 
 // Options used to show the timestamp with the following format
@@ -146,78 +147,22 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.UCCService.subjectSelectedWorkAreaAndAgv.next([params['workAreaId'], Number(params['agvId'])])
 
-        this.UCCService.getTaskListAgv(this.UCCService.currentOrder.order_id, Number(params['agvId'])).subscribe(tasks => {
+        if (!this.UCCService.currentOrder) {
 
-          console.log("getTaskListAGV", tasks);
+          //TODO remove timestamp hardcoded
+          this.UCCService.getOrdListByDateAndUC(this.useCase, "2020-07-24").subscribe((orders: Order[]) => {
+            //Ottengo il primo ordine non terminato e definisco questo come ordine corrente
+            this.UCCService.currentOrder = orders.find(order => order.order_ts_end == null)
+            //salvo nella sessione currentOrder
+            localStorage.setItem('currentOrder', JSON.stringify(this.UCCService.currentOrder));
 
-          let sourceProblems: Problem[] = []
-          let sourcePrelievi: Prelievo[] = []
-          //TODO: definire come dare settare le due data source problemi e prelievi
-          tasks.forEach((t: any) => {
-            let task = new Task(t.task_id, t.task_descr, t.det_short_id, t.order_id, t.start_time,
-              t.stop_time, t.task_status_id, t.task_comment, t.agv_id, t.oper_id, t.error_time, t.component_id,
-              t.task_type_id, t.task_ref, t.create_time)
-            switch (task.task_status_id) {
-              //created
-              case 1:
-                //  sourcePrelievi.push({
-                //   state: 1,
-                //   components: `PN${task.task_id}`,
-                //   kit: "45",
-                // //  hour: task.startTime.toLocaleTimeString('it', options)
-                // hour: new Date().toLocaleTimeString('it', options)
-                // })
-                break;
-              //completed
-              case 2:
-                //  console.log("STAMPA", task.computeDelayInMilliseconds())
-                sourcePrelievi.push({
-                  state: task.error_time ? 4 : 2,
-                  components: `${task.mach_det_id}`,
-                  kit: `${task.task_descr}`,
-                  //   hour: task.stop_time.toLocaleTimeString('it', options)
-                  hour: new Date().toLocaleTimeString('it', options),
-                  delay: task.computeDelayInMilliseconds() / 1000
-                })
-
-                break;
-              //failed
-              case 3:
-              //pending
-              case 4:
-                // c'è un errore ricavo tipologia problema
-                this.UCCService.getLastActiveError(Number(task.task_id)).subscribe(lastActiveError => {
-                  this.taskErrorId = task.task_id
-                  sourceProblems.push({
-                    state: 3,
-                    id: `${task.mach_det_id}`,
-                    kit: `${task.task_descr}`,
-                    //hour: task.error_time.toLocaleTimeString('it', options),
-                    hour: new Date().toLocaleTimeString('it', options),
-                    problemsFound: `${lastActiveError[0].error_description}`,
-                    button: '',
-                    description: `Problem description`,
-                    task_id: this.taskErrorId
-                  })
-                  this.dataSourceProblems.data = [...sourceProblems]
-                  this.dataSourceProblems.paginator = this.paginatorErrors
-                })
-
-
-                break;
-            }
-
-            sourcePrelievi = sourcePrelievi.sort((a, b) => b.hour.localeCompare(a.hour))
-            this.dataSourcePrelievi.data = sourcePrelievi
-
-            this.dataSourceProblems.data = [...sourceProblems]
-
-            this.dataSourcePrelievi.paginator = this.paginatorPrelievi
-            this.dataSourcePrelievi.sort = this.matSortPrelievi
-            this.dataSourceProblems.paginator = this.paginatorErrors
-            this.dataSourceProblems.sort = this.matSortProblems
+            this.initializeTables(params)
           })
-        })
+
+        } else {
+          this.initializeTables(params)
+        }
+
 
         if (!this.sseSub) {
           console.log("Mi iscrivo");
@@ -473,7 +418,88 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     };
     this.imageDialog.open(ProblemImageComponent, dialogConfig)
   }
+
+
+
+  initializeTables(params) {
+    this.UCCService.getTaskListAgv(this.UCCService.currentOrder.order_id, Number(params['agvId'])).subscribe(tasks => {
+
+      console.log("getTaskListAGV", tasks);
+
+      let sourceProblems: Problem[] = []
+      let sourcePrelievi: Prelievo[] = []
+      //TODO: definire come dare settare le due data source problemi e prelievi
+      tasks.forEach((t: any) => {
+        let task = new Task(t.task_id, t.task_descr, t.det_short_id, t.order_id, t.start_time,
+          t.stop_time, t.task_status_id, t.task_comment, t.agv_id, t.oper_id, t.error_time, t.component_id,
+          t.task_type_id, t.task_ref, t.create_time)
+        switch (task.task_status_id) {
+          //created
+          case 1:
+            //  sourcePrelievi.push({
+            //   state: 1,
+            //   components: `PN${task.task_id}`,
+            //   kit: "45",
+            // //  hour: task.startTime.toLocaleTimeString('it', options)
+            // hour: new Date().toLocaleTimeString('it', options)
+            // })
+            break;
+          //completed
+          case 2:
+            //  console.log("STAMPA", task.computeDelayInMilliseconds())
+            sourcePrelievi.push({
+              state: task.error_time ? 4 : 2,
+              components: `${task.mach_det_id}`,
+              kit: `${task.task_descr}`,
+              //   hour: task.stop_time.toLocaleTimeString('it', options)
+              hour: new Date().toLocaleTimeString('it', options),
+              delay: task.computeDelayInMilliseconds() / 1000
+            })
+
+            break;
+          //failed
+          case 3:
+          //pending
+          case 4:
+            // c'è un errore ricavo tipologia problema
+            this.UCCService.getLastActiveError(Number(task.task_id)).subscribe(lastActiveError => {
+              this.taskErrorId = task.task_id
+              sourceProblems.push({
+                state: 3,
+                id: `${task.mach_det_id}`,
+                kit: `${task.task_descr}`,
+                //hour: task.error_time.toLocaleTimeString('it', options),
+                hour: new Date().toLocaleTimeString('it', options),
+                problemsFound: `${lastActiveError[0].error_description}`,
+                button: '',
+                description: `Problem description`,
+                task_id: this.taskErrorId
+              })
+              this.dataSourceProblems.data = [...sourceProblems]
+              this.dataSourceProblems.paginator = this.paginatorErrors
+            })
+
+
+            break;
+        }
+
+        sourcePrelievi = sourcePrelievi.sort((a, b) => b.hour.localeCompare(a.hour))
+        this.dataSourcePrelievi.data = sourcePrelievi
+
+        this.dataSourceProblems.data = [...sourceProblems]
+
+        this.dataSourcePrelievi.paginator = this.paginatorPrelievi
+        this.dataSourcePrelievi.sort = this.matSortPrelievi
+        this.dataSourceProblems.paginator = this.paginatorErrors
+        this.dataSourceProblems.sort = this.matSortProblems
+      })
+    })
+
+
+
+  }
 }
+
 
 // const PROBLEMS: Item[] = [
 //   {
