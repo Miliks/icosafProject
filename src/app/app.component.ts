@@ -85,7 +85,8 @@ export class AppComponent implements OnInit {
         //console.log(response)
         let data = JSON.parse(response.data)
         console.log("DATA", data)
-        if (data.status == "NOK") {
+        // Se c'è stato un errore e non è un task dell'operatore
+        if (data.status == "NOK" && data.oper_id == null) {
 
           const dialogRef = this.dialog.open(NotificationComponent, {
             disableClose: true,
