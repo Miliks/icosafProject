@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import * as CryptoJS from 'crypto-js';
+import { environment } from 'src/environments/environment';
 
 
 @Injectable({
@@ -18,7 +19,7 @@ export class AuthService {
 
     console.log(encrypted.toString());
 
-    const URL: string = "http://localhost:4200/pwd/Details/verifyPwd";
+    const URL: string = `http://${environment.serverHost}/Details/verifyPwd`;
 
     return this.http.post<any>(URL, { login: username, pwd: encrypted.toString() });
   }

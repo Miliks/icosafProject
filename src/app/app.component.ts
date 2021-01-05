@@ -7,6 +7,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { LoginDialogComponent } from './components/login/login-dialog/login-dialog.component';
 import { MatSelectionList } from '@angular/material/list';
 import { NotificationComponent } from './components/notification/notification.component';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -78,7 +79,7 @@ export class AppComponent implements OnInit {
 
     console.log("Contacting events...")
     this.sseService
-      .getServerSentEvent("http://localhost:4200/API/events")
+      .getServerSentEvent(`${environment.sseEventsHost}/events`)
       .subscribe(response => {
 
         //TODO vedere cosa viene ricevuto e mandare a NOTIFICATION COMPONENT il mach det it

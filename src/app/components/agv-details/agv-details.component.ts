@@ -19,6 +19,7 @@ import { MatSort } from '@angular/material/sort';
 import { MatExpansionPanel } from '@angular/material/expansion';
 import { Task } from 'src/app/model/task.model';
 import { Order } from 'src/app/model/order.model';
+import { environment } from 'src/environments/environment';
 
 
 // Options used to show the timestamp with the following format
@@ -169,7 +170,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
           this.sseSub = this.sseService
-            .getServerSentEvent("http://localhost:4200/API/events")
+            .getServerSentEvent(`${environment.sseEventsHost}/events`)
             .subscribe(data => {
 
               console.log("D.d ", data.data);

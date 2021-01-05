@@ -13,6 +13,7 @@ import { UCCService } from 'src/app/services/UC-C/uc-c-service.service';
 import { Order } from 'src/app/model/order.model';
 import { Task } from 'src/app/model/task.model';
 import { SseService } from 'src/app/services/SseService/sse-service.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-dashboard',
@@ -121,7 +122,7 @@ export class DashboardComponent implements OnInit {
          * Subscription to the source of events
          */
         this.sseService
-          .getServerSentEvent("http://localhost:4200/API/events")
+          .getServerSentEvent(`${environment.sseEventsHost}/events`)
           .subscribe(data => {
 
             //recompute percentage tasks
