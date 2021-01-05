@@ -122,7 +122,7 @@ export class DashboardComponent implements OnInit {
          * Subscription to the source of events
          */
         this.sseService
-          .getServerSentEvent(`${environment.sseEventsHost}/events`)
+          .getServerSentEvent(`http://${environment.sseEventsHost}/events`)
           .subscribe(data => {
 
             //recompute percentage tasks

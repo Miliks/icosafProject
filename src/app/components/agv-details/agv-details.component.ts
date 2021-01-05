@@ -170,7 +170,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
           this.sseSub = this.sseService
-            .getServerSentEvent(`${environment.sseEventsHost}/events`)
+            .getServerSentEvent(`http://${environment.sseEventsHost}/events`)
             .subscribe(data => {
 
               console.log("D.d ", data.data);
