@@ -2,8 +2,7 @@
     <div class="externalHorizontalContainer">
 
         <div class="cardsContainer">
-            <mat-card class="example-card" *ngFor="let workArea of workAreas" (click)="selectWorkArea(workArea)"
-                [ngStyle]="{'width.vh': selectedWorkArea == workArea && !selectedAgv ? '75' : '50'}">
+            <mat-card class="example-card" *ngFor="let workArea of workAreas" (click)="selectWorkArea(workArea)">
                 <mat-card-header>
                     <mat-card-title>
                         <p class="titleCard">Area di Lavoro {{workArea.name}}</p>

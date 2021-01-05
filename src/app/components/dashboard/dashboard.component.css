@@ -3,13 +3,34 @@
 .example-card {
     /* width: auto !important; */
     margin-bottom: 5%;
-    min-width: 460px;
+    min-width: 40vh;
+    width: auto;
 }
+
+@media(max-width:700px){
+    .example-card {
+        /* width: auto !important; */
+        margin-bottom: 5%;
+        width: auto;
+    }
+
+    
+
+.cardsContainer {
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    background-color: #E8E9EE;
+    padding: 20px;
+}
+}
+
 
 
 .cardsContainer {
     width: auto;
     display: flex;
+    min-width: 25%;
     flex-direction: column;
     background-color: #E8E9EE;
     padding: 20px;
@@ -116,18 +137,12 @@ mat-list-item {
     display: flex;
     flex-direction: column;
     align-content: flex-end;
-    position: fixed;
     left: 35%;
-    min-width: 45%;
+    min-width: 40%;
+    width: auto;
     padding-top: 16px;
     margin-left: 5%;
     margin-right: 1%;
-}
-
-@media only screen and (max-width: 1200px) {
-    .detailsContainer {
-        visibility: hidden;
-    }
 }
 
 .mat-expansion-panel-header[aria-disabled="true"] {
