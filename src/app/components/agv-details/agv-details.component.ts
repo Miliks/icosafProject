@@ -200,6 +200,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
                     state: problemFound ? 4 : 2,
                     components: `${event.det_short_id}`,
                     kit: `${event.kit_name}`,
+                    // Settato da noi da vedere se corretto
                     hour: new Date().toLocaleTimeString('it', options),
                     delay: event.delay
                   }]
@@ -429,11 +430,15 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
       let sourceProblems: Problem[] = []
       let sourcePrelievi: Prelievo[] = []
+
+
       //TODO: definire come dare settare le due data source problemi e prelievi
       tasks.forEach((t: any) => {
         let task = new Task(t.task_id, t.task_descr, t.det_short_id, t.order_id, t.start_time,
           t.stop_time, t.task_status_id, t.task_comment, t.agv_id, t.oper_id, t.error_time, t.component_id,
           t.task_type_id, t.task_ref, t.create_time)
+
+          
         switch (task.task_status_id) {
           //created
           case 1:
@@ -447,13 +452,16 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
             break;
           //completed
           case 2:
+
+            console.log("task",task);
+
             //  console.log("STAMPA", task.computeDelayInMilliseconds())
             sourcePrelievi.push({
               state: task.error_time ? 4 : 2,
               components: `${task.mach_det_id}`,
               kit: `${task.task_descr}`,
               //   hour: task.stop_time.toLocaleTimeString('it', options)
-              hour: new Date().toLocaleTimeString('it', options),
+              hour: task.start_time_date.toLocaleTimeString('it', options),
               delay: task.computeDelayInMilliseconds() / 1000
             })
 
