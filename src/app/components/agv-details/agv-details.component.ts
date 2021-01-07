@@ -28,13 +28,13 @@ const options = { hour: "numeric", minute: "numeric", second: "numeric" }
 // Element in the problems panel
 export interface Problem {
   state: number; // 0 nessun problema or problema risolto // 1 problema // 2 componente non ancora considerato //3 loading
-  id: string;
+  components: string;
   kit: string;
   hour: string;
   problemsFound: string;
   description: string;
   button: string;
-  task_id: Number
+  task_id: Number;
 }
 
 // Element in the Prelievi panel
@@ -44,6 +44,7 @@ interface Prelievo {
   kit: string;
   hour: string;
   delay: number;
+  task_id: Number;
 }
 
 
@@ -121,9 +122,11 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.isHidingProblemHandling = true
     this.problems = []
-    this.problems.push({ image: "../../../assets/img/errorIcon.svg" },
+    this.problems.push(
+      { image: "../../../assets/img/errorIcon.svg" },
       { image: "../../../assets/img/dangerIcon.svg" },
-      { image: "../../../assets/img/settingIconSelected.svg" })
+      { image: "../../../assets/img/settingIconSelected.svg" }
+    )
 
     this.AGVActionSelection("");
 
@@ -192,21 +195,49 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
                   let problemFound = false
 
-                  let sourceProblem = this.dataSourceProblems.data.filter(problem => { problemFound = true; return problem.id !== `${det_short_id}` })
+                  let sourceProblem = this.dataSourceProblems.data.filter(problem => { problemFound = true; return problem.components !== `${det_short_id}` })
 
                   this.dataSourceProblems.data = sourceProblem
 
-                  let sourcePrelievi = [...this.dataSourcePrelievi.data, {
-                    state: problemFound ? 4 : 2,
-                    components: `${event.det_short_id}`,
-                    kit: `${event.kit_name}`,
-                    // Settato da noi da vedere se corretto
-                    hour: new Date().toLocaleTimeString('it', options),
-                    delay: event.delay
-                  }]
-                  sourcePrelievi = sourcePrelievi.sort((a, b) => b.hour.localeCompare(a.hour))
+                  // controllo se c'è un pending task con lo stesso id
+                  let taskAlreadyInPending = this.dataSourcePrelievi.data.find(prelievo => {
+                    console.log("TASKID",prelievo.task_id);
+                    
+                    return prelievo.task_id == Number(`${event.task_id}`)
+                  })
 
-                  this.dataSourcePrelievi.data = sourcePrelievi
+                  console.log("TASKALREADYPENDING",taskAlreadyInPending);
+                  
+
+                  // se lo trovo 
+                  if (taskAlreadyInPending != undefined) {
+                    // Se trovo il task già in prelievi allora:
+                    // è un errore ed era già solved ==> ignoro
+                    // il task era pending ==> passo a error solved
+
+                    // Stato pending ==> aggiorno a error_solved
+                    if (taskAlreadyInPending.state == 4) {
+                      taskAlreadyInPending.state = 5
+                    }
+                    // Aggirono datasource
+                    this.dataSourcePrelievi.data = [...this.dataSourcePrelievi.data]
+                  } else {
+                    // Non ho trovato task in prelievi ==> devo aggiungere
+                    let sourcePrelievi = [
+                      ...this.dataSourcePrelievi.data,
+                      {
+                        state: problemFound ? 4 : 2,
+                        components: `${event.det_short_id}`,
+                        kit: `${event.kit_name}`,
+                        // Settato da noi da vedere se corretto
+                        hour: new Date().toLocaleTimeString('it', options),
+                        delay: event.delay,
+                        task_id: Number(event.task_id)
+                      } as Prelievo
+                    ]
+                    sourcePrelievi = sourcePrelievi.sort((a, b) => b.hour.localeCompare(a.hour))
+                    this.dataSourcePrelievi.data = sourcePrelievi
+                  }
 
                   this.dataSourcePrelievi.paginator = this.paginatorPrelievi
                   this.dataSourcePrelievi.sort = this.matSortPrelievi
@@ -221,7 +252,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
                       this.dataSourceProblems.data = [
                         {
                           state: 3,
-                          id: `${event.det_short_id}`,
+                          components: `${event.det_short_id}`,
                           kit: `${event.kit_name}`,
                           hour: new Date().toLocaleTimeString('it', options),
                           problemsFound: `${lastActiveError[0].error_description}`,
@@ -370,9 +401,26 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.ngOnInit()
               })
             } else {
-              // Se è stata effettuata la chiamata ad operatore allora il task dovrebbe essere messo in pending
-              //TODO: rimuovere da errore e spostare in pending
-              this.dataSourceProblems.data[0]
+              // rimuovere da task da risolvere da operatore sul campo da errore e spostare in pending
+              let pendingProblem = this.dataSourceProblems.data[0]
+              // Aggiornamento problems
+              this.dataSourceProblems.data = []
+
+              let pendingTask = {
+                state: 4,
+                components: pendingProblem.components,
+                kit: pendingProblem.kit,
+                hour: pendingProblem.hour,
+                delay: null,
+                task_id: pendingProblem.task_id
+              } as Prelievo
+
+              let newDataSourcePrelievi = [...this.dataSourcePrelievi.data, pendingTask]
+              this.dataSourcePrelievi.data = [...newDataSourcePrelievi]
+
+
+              console.log("Nuovi PRELIEVI: ", this.dataSourcePrelievi.data)
+              console.log("Nuovi PROBLEMS: ", this.dataSourceProblems.data);
             }
           })
         })
@@ -438,7 +486,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
           t.stop_time, t.task_status_id, t.task_comment, t.agv_id, t.oper_id, t.error_time, t.component_id,
           t.task_type_id, t.task_ref, t.create_time)
 
-          
+
         switch (task.task_status_id) {
 
           //created
@@ -455,7 +503,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
           //completed
           case 2:
 
-            console.log("task",task);
+            console.log("task", task);
 
             //  console.log("STAMPA", task.computeDelayInMilliseconds())
             sourcePrelievi.push({
@@ -464,20 +512,21 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
               kit: `${task.task_descr}`,
               //   hour: task.stop_time.toLocaleTimeString('it', options)
               hour: task.start_time_date.toLocaleTimeString('it', options),
-              delay: task.computeDelayInMilliseconds() / 1000
+              delay: task.computeDelayInMilliseconds() / 1000,
+              task_id: Number(task.task_id)
             })
 
             break;
 
           //failed
           case 3:
-         
-          // c'è un errore ricavo tipologia problema
+
+            // c'è un errore ricavo tipologia problema
             this.UCCService.getLastActiveError(Number(task.task_id)).subscribe(lastActiveError => {
               this.taskErrorId = task.task_id
               sourceProblems.push({
                 state: 3,
-                id: `${task.mach_det_id}`,
+                components: `${task.mach_det_id}`,
                 kit: `${task.task_descr}`,
                 //hour: task.error_time.toLocaleTimeString('it', options),
                 hour: new Date().toLocaleTimeString('it', options),
@@ -489,15 +538,15 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
               this.dataSourceProblems.data = [...sourceProblems]
               this.dataSourceProblems.paginator = this.paginatorErrors
             })
-           console.log("task",task);
+            console.log("task", task);
 
-           //  console.log("STAMPA", task.computeDelayInMilliseconds())
-         
+            //  console.log("STAMPA", task.computeDelayInMilliseconds())
+
             break;
-            
+
           // pending
           case 4:
-            console.log("task",task);
+            console.log("task", task);
 
             //  console.log("STAMPA", task.computeDelayInMilliseconds())
             sourcePrelievi.push({
@@ -506,13 +555,14 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
               kit: `${task.task_descr}`,
               //   hour: task.stop_time.toLocaleTimeString('it', options)
               hour: task.start_time_date.toLocaleTimeString('it', options),
-              delay: null // TODO VERIFICARE SE CORRETTO
+              delay: null,// TODO VERIFICARE SE CORRETTO,
+              task_id: Number(task.task_id)
             })
             break;
 
           // error_solved
           case 5:
-            console.log("task",task);
+            console.log("task", task);
 
             //  console.log("STAMPA", task.computeDelayInMilliseconds())
             sourcePrelievi.push({
@@ -521,9 +571,9 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
               kit: `${task.task_descr}`,
               //   hour: task.stop_time.toLocaleTimeString('it', options)
               hour: task.start_time_date.toLocaleTimeString('it', options),
-              delay:  task.computeDelayInMilliseconds()
+              delay: task.computeDelayInMilliseconds(),
+              task_id: Number(task.task_id)
             })
-
             break;
         }
 
@@ -536,6 +586,10 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.dataSourcePrelievi.sort = this.matSortPrelievi
         this.dataSourceProblems.paginator = this.paginatorErrors
         this.dataSourceProblems.sort = this.matSortProblems
+
+        console.log("PRELIEVI: ", this.dataSourcePrelievi.data)
+        console.log("PROBLEMS: ", this.dataSourceProblems.data);
+
       })
     })
   }
