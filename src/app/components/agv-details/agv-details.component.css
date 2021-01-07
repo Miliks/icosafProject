@@ -154,3 +154,9 @@
 .dialogTitle{
 text-align: center;
 }
+.normalColumn{
+  padding: 10px;
+}
+.lastColumn{
+  padding: 10px;
+}
