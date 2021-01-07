@@ -151,10 +151,13 @@
                 <th mat-header-cell *matHeaderCellDef class="normalColumn"> STATO  </th>
                 <td mat-cell *matCellDef="let element">
                     <div [ngSwitch]="element.state">
-                        <!-- 0: ok or problem solved, 1: warning , 2: not yet considered, 3: loading-->
+                        <!-- 1: created , 2: completed, 3: error,  4: loading  5: error_solved  -->
 
                         <mat-icon *ngSwitchCase="2" aria-hidden="false" aria-label="Example home icon" color="success">
                             check_circle
+                        </mat-icon>
+                        <mat-icon *ngSwitchCase="4" aria-hidden="false" aria-label="Example home icon" color="looping">
+                            loop
                         </mat-icon>
                         <!-- <div *ngSwitchCase="1">
                         </div> -->
@@ -164,7 +167,7 @@
                         <!-- <mat-icon *ngSwitchCase="5" aria-hidden="false" aria-label="Example home icon" color="looping">
                             loop
                         </mat-icon> -->
-                        <mat-icon *ngSwitchCase="4" svgIcon="error-solved" aria-hidden="false"></mat-icon>
+                        <mat-icon *ngSwitchCase="5" svgIcon="error-solved" aria-hidden="false"></mat-icon>
                         <div *ngSwitchDefault>
                         </div>
                     </div>
@@ -192,7 +195,7 @@
             <!-- Interval Column -->
             <ng-container matColumnDef="delay">
                 <th mat-header-cell *matHeaderCellDef class="lastColumn" mat-sort-header> DURATA (s) </th>
-                <td mat-cell *matCellDef="let element" class="lastColumn"> {{element.delay}}</td>
+                <td mat-cell *matCellDef="let element" class="lastColumn"> {{element.delay ? element.delay : ""}} </td>
             </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="displayedColumnsPrelievi"></tr>

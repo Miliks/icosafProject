@@ -173,7 +173,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
             .getServerSentEvent(`http://${environment.sseEventsHost}/events`)
             .subscribe(data => {
 
-              console.log("D.d ", data.data);
+              console.log("data received in events: ", data.data);
 
 
               let event = JSON.parse(data.data)
@@ -440,6 +440,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
           
         switch (task.task_status_id) {
+
           //created
           case 1:
             //  sourcePrelievi.push({
@@ -450,6 +451,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
             // hour: new Date().toLocaleTimeString('it', options)
             // })
             break;
+
           //completed
           case 2:
 
@@ -457,7 +459,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
             //  console.log("STAMPA", task.computeDelayInMilliseconds())
             sourcePrelievi.push({
-              state: task.error_time ? 4 : 2,
+              state: task.error_time ? 5 : 2, // se ha avuto un errore allora error_solved
               components: `${task.mach_det_id}`,
               kit: `${task.task_descr}`,
               //   hour: task.stop_time.toLocaleTimeString('it', options)
@@ -466,11 +468,11 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
             })
 
             break;
+
           //failed
           case 3:
-          //pending
-          case 4:
-            // c'è un errore ricavo tipologia problema
+         
+          // c'è un errore ricavo tipologia problema
             this.UCCService.getLastActiveError(Number(task.task_id)).subscribe(lastActiveError => {
               this.taskErrorId = task.task_id
               sourceProblems.push({
@@ -487,7 +489,40 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
               this.dataSourceProblems.data = [...sourceProblems]
               this.dataSourceProblems.paginator = this.paginatorErrors
             })
+           console.log("task",task);
 
+           //  console.log("STAMPA", task.computeDelayInMilliseconds())
+         
+            break;
+            
+          // pending
+          case 4:
+            console.log("task",task);
+
+            //  console.log("STAMPA", task.computeDelayInMilliseconds())
+            sourcePrelievi.push({
+              state: 4,
+              components: `${task.mach_det_id}`,
+              kit: `${task.task_descr}`,
+              //   hour: task.stop_time.toLocaleTimeString('it', options)
+              hour: task.start_time_date.toLocaleTimeString('it', options),
+              delay: null // TODO VERIFICARE SE CORRETTO
+            })
+            break;
+
+          // error_solved
+          case 5:
+            console.log("task",task);
+
+            //  console.log("STAMPA", task.computeDelayInMilliseconds())
+            sourcePrelievi.push({
+              state: 5,
+              components: `${task.mach_det_id}`,
+              kit: `${task.task_descr}`,
+              //   hour: task.stop_time.toLocaleTimeString('it', options)
+              hour: task.start_time_date.toLocaleTimeString('it', options),
+              delay:  task.computeDelayInMilliseconds()
+            })
 
             break;
         }
@@ -503,9 +538,6 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.dataSourceProblems.sort = this.matSortProblems
       })
     })
-
-
-
   }
 }
 
