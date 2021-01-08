@@ -75,8 +75,6 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
 
-
-    
     console.log("Contacting events...")
     this.sseService
       .getServerSentEvent(`http://${environment.sseEventsHost}/events`)

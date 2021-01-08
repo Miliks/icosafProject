@@ -201,13 +201,13 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
                   // controllo se c'è un pending task con lo stesso id
                   let taskAlreadyInPending = this.dataSourcePrelievi.data.find(prelievo => {
-                    console.log("TASKID",prelievo.task_id);
-                    
+                    console.log("TASKID", prelievo.task_id);
+
                     return prelievo.task_id == Number(`${event.task_id}`)
                   })
 
-                  console.log("TASKALREADYPENDING",taskAlreadyInPending);
-                  
+                  console.log("TASKALREADYPENDING", taskAlreadyInPending);
+
 
                   // se lo trovo 
                   if (taskAlreadyInPending != undefined) {
@@ -364,8 +364,9 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
         //TODO: qui ottenere il mach det id e l'order id corrispondenti al task
         let order_id = res[0].order_id;
         let mach_det_id = res[0].mach_det_id
+        let lastActiveErrorValue = lastActiveError[0]
+        console.log("IMPOR", order_id, mach_det_id, this.selectedAgv, lastActiveError[0]);
 
-        console.log("IMPOR", order_id, mach_det_id, this.selectedAgv, lastActiveError[0].error_id);
 
 
         let solve_action_type_id: number
@@ -385,10 +386,9 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
           let solve_act_master_id: number = solveActMastIdResponse[0].solve_act_master_id
 
+          console.log("insertSolveAction", this.AGVActionSelected, 1, Number(this.selectedAgv), lastActiveErrorValue.task_id, solve_act_master_id, lastActiveError[0].error_id, this.AGVActionSelected == 'Richiesta intervento urgente' ? 1 : 2);
 
-          console.log("insertSolveAction", this.AGVActionSelected, 2, Number(this.selectedAgv), solve_act_master_id, lastActiveError[0].error_id, this.AGVActionSelected == 'Richiesta intervento urgente' ? 1 : 2);
-
-          this.UCCService.setSolveAction(this.AGVActionSelected, 2, Number(this.selectedAgv), solve_act_master_id, lastActiveError[0].error_id, this.AGVActionSelected == 'Richiesta intervento urgente' ? 1 : 2).subscribe(response => {
+          this.UCCService.setSolveAction(this.AGVActionSelected, 1, lastActiveErrorValue.task_id, Number(this.selectedAgv), solve_act_master_id, lastActiveError[0].error_id, this.AGVActionSelected == 'Richiesta intervento urgente' ? 1 : 2).subscribe(response => {
 
             //INSERTSOLVEACTION EFFETTUATA
             console.log("INSERTSOLVEACTION EFFETTUATA");
@@ -472,6 +472,8 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   initializeTables(params) {
+    console.log(this.UCCService.currentOrder.order_id, params['agvId']);
+
     this.UCCService.getTaskListAgv(this.UCCService.currentOrder.order_id, Number(params['agvId'])).subscribe(tasks => {
 
       console.log("getTaskListAGV", tasks);
@@ -482,6 +484,8 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
       //TODO: definire come dare settare le due data source problemi e prelievi
       tasks.forEach((t: any) => {
+
+
         let task = new Task(t.task_id, t.task_descr, t.det_short_id, t.order_id, t.start_time,
           t.stop_time, t.task_status_id, t.task_comment, t.agv_id, t.oper_id, t.error_time, t.component_id,
           t.task_type_id, t.task_ref, t.create_time)
