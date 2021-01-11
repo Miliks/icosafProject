@@ -4,7 +4,7 @@
  * 24/12/20
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
@@ -13,13 +13,15 @@ import { SseService } from 'src/app/services/SseService/sse-service.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatPaginator } from '@angular/material/paginator';
 import { Subscription } from 'rxjs';
-import { UCCService } from 'src/app/services/UC-C/uc-c-service.service';
+import { ICOSAFService } from 'src/app/services/UC-C/uc-c-service.service';
 import { MatRadioGroup } from '@angular/material/radio';
 import { MatSort } from '@angular/material/sort';
 import { MatExpansionPanel } from '@angular/material/expansion';
 import { Task } from 'src/app/model/task.model';
 import { Order } from 'src/app/model/order.model';
 import { environment } from 'src/environments/environment';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { take } from 'rxjs/operators';
 
 
 // Options used to show the timestamp with the following format
@@ -88,9 +90,13 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   queryParamsSub: Subscription;
   useCase: string;
   selectedAgv: string;
+  textAreaValue: string;
 
   private _paginatorPrelievi: MatPaginator;
   paramsSub: Subscription;
+  showCommentSection: boolean;
+  rimanereFermoOption: boolean;
+  selectedWorkArea: any;
 
   public get paginatorPrelievi(): MatPaginator {
     return this._paginatorPrelievi;
@@ -112,13 +118,17 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dataSourceProblems.paginator = this.paginatorErrors
   }
 
+  @ViewChild('autosize') autosize: CdkTextareaAutosize;
 
   constructor(
+    private _ngZone: NgZone,
     public dialog: MatDialog,
     public imageDialog: MatDialog,
     private sseService: SseService,
-    private UCCService: UCCService,
-    private activatedRoute: ActivatedRoute) {
+    private icosafService: ICOSAFService,
+    private activatedRoute: ActivatedRoute,
+    private router: Router
+  ) {
 
     this.isHidingProblemHandling = true
     this.problems = []
@@ -132,7 +142,19 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.dataSourcePrelievi = new MatTableDataSource()
     this.dataSourceProblems = new MatTableDataSource()
+
+    this.showCommentSection = false
+    this.rimanereFermoOption = false
+    this.textAreaValue = ""
   }
+
+
+  triggerResize() {
+    // Wait for changes to be applied, then trigger textarea resize.
+    this._ngZone.onStable.pipe(take(1))
+      .subscribe(() => this.autosize.resizeToFitContent(true));
+  }
+
   ngAfterViewInit(): void {
     this.paginatorPrelievi = this.dataSourcePrelievi.paginator
     this.paginatorErrors = this.dataSourceProblems.paginator
@@ -148,17 +170,18 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
       if (params['workAreaId'] && params['agvId'] && this.activatedRoute.parent.snapshot.params["useCase"]) {
         this.useCase = this.activatedRoute.parent.snapshot.params["useCase"]
         this.selectedAgv = params['agvId']
+        this.selectedWorkArea = params['workAreaId']
 
-        this.UCCService.subjectSelectedWorkAreaAndAgv.next([params['workAreaId'], Number(params['agvId'])])
+        this.icosafService.subjectSelectedWorkAreaAndAgv.next([params['workAreaId'], Number(params['agvId'])])
 
-        if (!this.UCCService.currentOrder) {
+        if (!this.icosafService.currentOrder) {
 
           //TODO remove timestamp hardcoded
-          this.UCCService.getOrdListByDateAndUC(this.useCase, "2020-07-24").subscribe((orders: Order[]) => {
+          this.icosafService.getOrdListByDateAndUC(this.useCase, "2020-07-24").subscribe((orders: Order[]) => {
             //Ottengo il primo ordine non terminato e definisco questo come ordine corrente
-            this.UCCService.currentOrder = orders.find(order => order.order_ts_end == null)
+            this.icosafService.currentOrder = orders.find(order => order.order_ts_end == null)
             //salvo nella sessione currentOrder
-            localStorage.setItem('currentOrder', JSON.stringify(this.UCCService.currentOrder));
+            localStorage.setItem('currentOrder', JSON.stringify(this.icosafService.currentOrder));
 
             this.initializeTables(params)
           })
@@ -245,7 +268,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
                 } else {
                   if (event.status === "NOK") {
 
-                    this.UCCService.getLastActiveError(event.task_id).subscribe(lastActiveError => {
+                    this.icosafService.getLastActiveError(event.task_id).subscribe(lastActiveError => {
                       console.log("lastActiveError", lastActiveError);
 
                       let taskId = event.task_id
@@ -306,6 +329,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (actionSelected === this.agvOptions[1]) {
       console.log("selezionato rimanere fermo")
+      this.rimanereFermoOption = true
       if (!this.opOptions.find(o => o.val == true))
         this.opOptions[0].val = true
       for (let op of this.opOptions) {
@@ -314,6 +338,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
       console.log("Changed now")
     }
     else {
+      this.rimanereFermoOption = false
       console.log("selezionato altro")
       for (let op of this.opOptions) {
         op.val = false
@@ -353,12 +378,12 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // C'è sempre e solo un errore
     let lastActiveError = this.dataSourceProblems.data[0]
-    this.UCCService.getLastActiveError(Number(lastActiveError.task_id)).subscribe(lastActiveError => {
+    this.icosafService.getLastActiveError(Number(lastActiveError.task_id)).subscribe(lastActiveError => {
       //console.log(success[0].error_id);
 
       //TODO: modificare campi fissi e controllo azione selezionata con stringa
 
-      this.UCCService.getTaskDetails(this.taskErrorId).subscribe(res => {
+      this.icosafService.getTaskDetails(this.taskErrorId).subscribe(res => {
 
 
         //TODO: qui ottenere il mach det id e l'order id corrispondenti al task
@@ -380,22 +405,25 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
         console.log("getMappingErAct", lastActiveError[0].error_type_id, solve_action_type_id);
 
-        this.UCCService.getMappingErAct(lastActiveError[0].error_type_id, solve_action_type_id).subscribe(solveActMastIdResponse => {
+        this.icosafService.getMappingErAct(lastActiveError[0].error_type_id, solve_action_type_id).subscribe(solveActMastIdResponse => {
 
           console.log(solveActMastIdResponse);
 
           let solve_act_master_id: number = solveActMastIdResponse[0].solve_act_master_id
 
-          console.log("insertSolveAction", this.AGVActionSelected, 1, Number(this.selectedAgv), lastActiveErrorValue.task_id, solve_act_master_id, lastActiveError[0].error_id, this.AGVActionSelected == 'Richiesta intervento urgente' ? 1 : 2);
+          console.log("insertSolveAction", this.textAreaValue == "" ? this.AGVActionSelected : this.textAreaValue, 1, Number(this.selectedAgv), lastActiveErrorValue.task_id, solve_act_master_id, lastActiveError[0].error_id, this.AGVActionSelected == 'Richiesta intervento urgente' ? 1 : 2);
 
-          this.UCCService.setSolveAction(this.AGVActionSelected, 1, lastActiveErrorValue.task_id, Number(this.selectedAgv), solve_act_master_id, lastActiveError[0].error_id, this.AGVActionSelected == 'Richiesta intervento urgente' ? 1 : 2).subscribe(response => {
+          this.icosafService.setSolveAction(this.textAreaValue == "" ? this.AGVActionSelected : this.textAreaValue, 1, lastActiveErrorValue.task_id, Number(this.selectedAgv), solve_act_master_id, lastActiveError[0].error_id, this.AGVActionSelected == 'Richiesta intervento urgente' ? 1 : 2).subscribe(response => {
+
+            // TODO fare in modo che venga aggiornata anche la dashboard
+            this.router.navigate(["Home", `${this.useCase}`, { outlets: { dashboardContent: ["work-area", this.selectedWorkArea, "agv-details", this.selectedAgv] } }]);
 
             //INSERTSOLVEACTION EFFETTUATA
             console.log("INSERTSOLVEACTION EFFETTUATA");
 
             // Se non si da il caso che sia una richiesta ad operatore allora invia la risoluzione
             if (this.AGVActionSelected != 'Rimanere fermo') {
-              this.UCCService.setTaskStatusOk(Number(this.taskErrorId)).subscribe(_ => {
+              this.icosafService.setTaskStatusOk(Number(this.taskErrorId)).subscribe(_ => {
                 console.log("Risolvi ora", this.AGVActionSelected, response)
                 this.taskErrorId = null
                 this.ngOnInit()
@@ -426,6 +454,21 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
         })
       })
     })
+  }
+
+  /**
+   * Method used to open the comment section used by the remote operator to specify some comments related to the 
+   * solving action he is sending
+   */
+  toggleComment() {
+    this.showCommentSection = !this.showCommentSection
+  }
+
+  /**
+   * Method called whenever the user insert a comment
+   */
+  onInputTextArea(value) {
+    this.textAreaValue = value
   }
 
   /**
@@ -472,9 +515,9 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   initializeTables(params) {
-    console.log(this.UCCService.currentOrder.order_id, params['agvId']);
+    console.log(this.icosafService.currentOrder.order_id, params['agvId']);
 
-    this.UCCService.getTaskListAgv(this.UCCService.currentOrder.order_id, Number(params['agvId'])).subscribe(tasks => {
+    this.icosafService.getTaskListAgv(this.icosafService.currentOrder.order_id, Number(params['agvId'])).subscribe(tasks => {
 
       console.log("getTaskListAGV", tasks);
 
@@ -526,7 +569,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
           case 3:
 
             // c'è un errore ricavo tipologia problema
-            this.UCCService.getLastActiveError(Number(task.task_id)).subscribe(lastActiveError => {
+            this.icosafService.getLastActiveError(Number(task.task_id)).subscribe(lastActiveError => {
               this.taskErrorId = task.task_id
               sourceProblems.push({
                 state: 3,

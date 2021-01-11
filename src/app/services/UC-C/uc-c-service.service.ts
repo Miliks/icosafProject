@@ -13,10 +13,7 @@ import { environment } from 'src/environments/environment';
 @Injectable({
   providedIn: 'root'
 })
-export class UCCService {
-
-
-
+export class ICOSAFService {
 
 
   // The subject is used to communicate data among non related components, in particular the name of the workArea and the AGV
@@ -117,7 +114,6 @@ export class UCCService {
    * @param severity: 1-high, 2-low; if the call to the operator is urgent then 1 otherwise 2
    */
   setSolveAction(solve_action_text: string, operator_ass_id: number, task_id:number, cobot_id: number, solve_act_mast_id: number, error_id: number, severity: number): Observable<any> {
-    solve_action_text ="AA"
     let url = `http://${environment.serverHost}/Details/insertSolveAction?solve_action=${solve_action_text}&operator_ass_id=${operator_ass_id}&task_id=${task_id}&cobot_id=${cobot_id}&oper_exec_id=1&solve_act_mast_id=${solve_act_mast_id}&error_id=${error_id}&severity=${severity}`
     console.log("URL INSERTSOLVEACTION",url);
     

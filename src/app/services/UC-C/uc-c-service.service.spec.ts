@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { UCCService } from './uc-c-service.service';
+import { ICOSAFService } from './uc-c-service.service';
 
 describe('UCCServiceService', () => {
-  let service: UCCService;
+  let service: ICOSAFService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(UCCService);
+    service = TestBed.inject(ICOSAFService);
   });
 
   it('should be created', () => {

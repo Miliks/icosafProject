@@ -98,11 +98,17 @@
                                                     [disabled]="opOption.dis" value="{{op_index}}"
                                                     [checked]="opOption.val" (click)="OpActionSelection(opOption)">
                                                     {{opOption.text}}</mat-radio-button>
-                                                <u>Aggiungere un testo</u>
+                                                <u *ngIf="rimanereFermoOption" (click)="toggleComment()">Aggiungere un
+                                                    testo</u>
                                             </mat-radio-group>
                                         </div>
                                     </div>
                                 </div>
+                                <mat-form-field *ngIf="showCommentSection" class="textarea">
+                                    <mat-label>Inserisci commento</mat-label>
+                                    <textarea matInput cdkTextareaAutosize #autosize="cdkTextareaAutosize"
+                                        cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5" (input)="onInputTextArea($event.target.value)"></textarea>
+                                </mat-form-field>
                                 <button mat-flat-button (click)="proceed()" class="proceedButton">PROCEDI</button>
                             </form>
                         </div>
@@ -148,7 +154,7 @@
         <table mat-table [dataSource]="dataSourcePrelievi" #matSortPrelievi="matSort" multiTemplateDataRows matSort>
             <!-- State Column -->
             <ng-container matColumnDef="state">
-                <th mat-header-cell *matHeaderCellDef class="normalColumn"> STATO  </th>
+                <th mat-header-cell *matHeaderCellDef class="normalColumn"> STATO </th>
                 <td mat-cell *matCellDef="let element">
                     <div [ngSwitch]="element.state">
                         <!-- 1: created , 2: completed, 3: error,  4: loading  5: error_solved  -->

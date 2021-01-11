@@ -4,7 +4,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { UCCService } from 'src/app/services/UC-C/uc-c-service.service';
+import { ICOSAFService } from 'src/app/services/UC-C/uc-c-service.service';
 
 @Component({
   selector: 'app-notification',
@@ -26,7 +26,7 @@ export class NotificationComponent implements OnInit {
   //The notification component is called by the app.component whenever is necessary
   constructor(
     private router: Router,
-    @Inject(MAT_DIALOG_DATA) public data, private UCCService: UCCService) {
+    @Inject(MAT_DIALOG_DATA) public data, private icosafService: ICOSAFService) {
 
     // This data are passed for sure, but for safety they are controlled
     if (data.taskId) this.taskId = data.taskId
@@ -35,7 +35,7 @@ export class NotificationComponent implements OnInit {
     if (data.agvId) this.agvId = data.agvId
     if (data.uc) this.uc = data.uc
 
-    this.UCCService.getLastActiveError(Number(this.taskId)).subscribe(lastActiveErrorResp => {
+    this.icosafService.getLastActiveError(Number(this.taskId)).subscribe(lastActiveErrorResp => {
       this.error_description = lastActiveErrorResp[0].error_description
     })
 

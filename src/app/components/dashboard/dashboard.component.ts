@@ -9,7 +9,7 @@ import { Agv } from 'src/app/model/agv.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { EXPANSION_PANEL_ANIMATION_TIMING } from '@angular/material/expansion';
-import { UCCService } from 'src/app/services/UC-C/uc-c-service.service';
+import { ICOSAFService } from 'src/app/services/UC-C/uc-c-service.service';
 import { Order } from 'src/app/model/order.model';
 import { Task } from 'src/app/model/task.model';
 import { SseService } from 'src/app/services/SseService/sse-service.service';
@@ -45,7 +45,7 @@ export class DashboardComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private sseService: SseService,
     private router: Router,
-    private UCCService: UCCService) {
+    private icosafService: ICOSAFService) {
 
     this.stateJPH = 'collapsed';
     this.stateSat = 'collapsed'
@@ -88,7 +88,7 @@ export class DashboardComponent implements OnInit {
           this.openAgvDetails(this.selectedWorkArea, this.selectedWorkArea.agvList[0]);
         }
 
-        this.UCCService.getSubjectSelectedWorkAreaAndAgv().subscribe(workAreaAndAgvIds => {
+        this.icosafService.getSubjectSelectedWorkAreaAndAgv().subscribe(workAreaAndAgvIds => {
 
           console.log(workAreaAndAgvIds);
 
@@ -101,15 +101,15 @@ export class DashboardComponent implements OnInit {
         })
 
         //TODO remove timestamp hardcoded
-        this.UCCService.getOrdListByDateAndUC(this.useCase, "2020-07-24").subscribe((orders: Order[]) => {
+        this.icosafService.getOrdListByDateAndUC(this.useCase, "2020-07-24").subscribe((orders: Order[]) => {
 
           //Ottengo il primo ordine non terminato e definisco questo come ordine corrente
-          this.UCCService.currentOrder = orders.find(order => order.order_ts_end == null)
+          this.icosafService.currentOrder = orders.find(order => order.order_ts_end == null)
 
           //salvo nella sessione currentOrder
-          localStorage.setItem('currentOrder', JSON.stringify(this.UCCService.currentOrder));
+          localStorage.setItem('currentOrder', JSON.stringify(this.icosafService.currentOrder));
 
-          this.UCCService.getTaskListOrder(this.UCCService.currentOrder.order_id).subscribe((tasks: Task[]) => {
+          this.icosafService.getTaskListOrder(this.icosafService.currentOrder.order_id).subscribe((tasks: Task[]) => {
             // Per ricavare la workarea in cui lavora il nostro agv facciamo una ricerca interna per il momento
             // w1.agvList[0].setProgress(completed*100/total)
             // w1.agvList[0].setError(error)
@@ -126,7 +126,7 @@ export class DashboardComponent implements OnInit {
           .subscribe(data => {
 
             //recompute percentage tasks
-            this.UCCService.getTaskListOrder(this.UCCService.currentOrder.order_id).subscribe((tasks: Task[]) => {
+            this.icosafService.getTaskListOrder(this.icosafService.currentOrder.order_id).subscribe((tasks: Task[]) => {
               // Per ricavare la workarea in cui lavora il nostro agv facciamo una ricerca interna per il momento
               // w1.agvList[0].setProgress(completed*100/total)
               // w1.agvList[0].setError(error)
