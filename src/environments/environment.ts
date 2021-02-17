@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  sseEventsHost : "localhost:4200/API",
+  sseEventsHost : "localhost:4200",
   serverHost: "icowms.cloud.reply.eu"
 };
 

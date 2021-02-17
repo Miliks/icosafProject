@@ -4,16 +4,12 @@
     "secure": false,
     "pathRewrite": {
       "^/pwd": ""
-    },
-    "changeOrigin": true
-  },
-  "/API/*": {
-    "target": "http://sseicosaf.cloud.reply.eu",
-    "secure": false,
-    "pathRewrite": {
-      "^/API": ""
-    },
-    "changeOrigin": true
-  }
-
+    } 
+   },
+  "/events" : {
+      "target": "http://sseicosaf.cloud.reply.eu",
+      "secure": false,
+      "changeOrigin": true,
+      "logLevel": "debug"
+    }
 }

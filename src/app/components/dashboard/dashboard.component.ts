@@ -104,7 +104,7 @@ export class DashboardComponent implements OnInit {
         this.icosafService.getOrdListByDateAndUC(this.useCase, "2020-07-24").subscribe((orders: Order[]) => {
 
           //Ottengo il primo ordine non terminato e definisco questo come ordine corrente
-          this.icosafService.currentOrder = orders.find(order => order.order_ts_end == null)
+          this.icosafService.currentOrder = orders.find(order => order.order_ts_end  && order.order_uc == this.useCase)
 
           //salvo nella sessione currentOrder
           localStorage.setItem('currentOrder', JSON.stringify(this.icosafService.currentOrder));
@@ -262,17 +262,16 @@ export function calculatePercentage(tasks: Task[], workAreas: WorkArea[]) {
       }
     }
   }
-
+  
   let agv
   let wa
-
   // console.log("WA", workAreas)
 
   for (let id of agvIdsMap.keys()) {
     // console.log("ID", id);
 
-    wa = workAreas.find(wa => {
-      agv = wa.agvList.find(a => a.id == id)
+    wa = workAreas.find(w => {
+      agv = w.agvList.find(a => a.id == id)
       return agv !== undefined
     })
 
