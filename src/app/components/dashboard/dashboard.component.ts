@@ -6,7 +6,7 @@
 import { Component, OnInit } from '@angular/core';
 import { WorkArea } from 'src/app/model/work-area.model';
 import { Agv } from 'src/app/model/agv.model';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { EXPANSION_PANEL_ANIMATION_TIMING } from '@angular/material/expansion';
 import { ICOSAFService } from 'src/app/services/UC-C/uc-c-service.service';
@@ -36,6 +36,7 @@ export class DashboardComponent implements OnInit {
   stateCycleTime: string
   useCase: string;
   workAreas: WorkArea[]
+  allWorkAreas: WorkArea[]
   progress: number
 
   selectedWorkArea: WorkArea
@@ -53,8 +54,11 @@ export class DashboardComponent implements OnInit {
 
     this.progress = 75
     this.workAreas = []
+    this.allWorkAreas = [new WorkArea(1, "AMR", [new Agv(1), new Agv(2)]) , new WorkArea(2, "CSKP", [new Agv(3), new Agv(4), new Agv(5), new Agv(6)])]
 
   }
+
+
 
   ngOnInit(): void {
 
@@ -92,7 +96,7 @@ export class DashboardComponent implements OnInit {
 
           console.log(workAreaAndAgvIds);
 
-          this.selectedWorkArea = this.workAreas.find(workArea => workArea.name == workAreaAndAgvIds[0])//workArea.id === workAreaAndAgvIds[0] || 
+          this.selectedWorkArea = this.allWorkAreas.find(workArea => workArea.name == workAreaAndAgvIds[0])//workArea.id === workAreaAndAgvIds[0] || 
           //this.selectWorkArea(this.workAreas.find(workArea => workArea.id === workAreaAndAgvIds[0]))
           //console.log("selected is ", this.selectedWorkArea);      
           //console.log("its AGVList is ", this.selectedWorkArea.agvList);
@@ -206,7 +210,20 @@ export class DashboardComponent implements OnInit {
       this.router.navigate(["Home", `${this.useCase}`])
     }
   }
+  recomputeWorkAreas(params : Params){
+    if (params['useCase']) {
+      this.useCase = params['useCase']
 
+      let w1_2 = this.useCase === "UC-C" ? new WorkArea(1, "AMR", [new Agv(1), new Agv(2)]) : new WorkArea(2, "CSKP", [new Agv(3), new Agv(4), new Agv(5), new Agv(6)])
+    this.workAreas = []
+      this.workAreas.push(w1_2) // w5, w3, w4
+
+      if (!this.selectedWorkArea && !this.selectedAgv) {
+        this.selectWorkArea(this.workAreas[0])
+        this.openAgvDetails(this.selectedWorkArea, this.selectedWorkArea.agvList[0]);
+      }
+  }
+}
   /**
    * Method to show the mock stats
    * @param typeGraph 
@@ -282,6 +299,8 @@ export function calculatePercentage(tasks: Task[], workAreas: WorkArea[]) {
     wa.agvList.find(a => a.id == id).setError(currentStat.error)
   
   }
+
+  
 }
 
 interface Statistics {
@@ -289,4 +308,6 @@ interface Statistics {
   total: number,
   error: boolean
 }
+
+
 

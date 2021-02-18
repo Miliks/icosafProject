@@ -3,6 +3,8 @@
  */
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { Order } from 'src/app/model/order.model';
+import { ICOSAFService } from 'src/app/services/UC-C/uc-c-service.service';
 
 export interface Tile {
   color: string;
@@ -29,7 +31,7 @@ export class GridListUCComponent {
 
   navLinks: any[]
 
-  constructor(private router: Router) {
+  constructor(private router: Router,    private icosafService: ICOSAFService) {
     this.navLinks = navLinks
   }
 
@@ -43,13 +45,17 @@ export class GridListUCComponent {
 
   onClickButton(useCase: string) {
 
+    let uc;
     switch (useCase) {
+      
 
-      case 'A':
-        this.router.navigate(['Home','UC-A'])
+      case 'A':   
+      uc = "UC-A"
+      this.recomputeOrderAndNavigate(uc);
         break;
       case 'C':
-        this.router.navigate(['Home','UC-C'])
+        uc = 'UC-C'
+        this.recomputeOrderAndNavigate(uc)
         break;
       default: 
       this.router.navigate(['use-case-details'], { queryParams: { UC: useCase } })
@@ -57,5 +63,18 @@ export class GridListUCComponent {
     }
   }
 
+  private recomputeOrderAndNavigate(uc:string){
+    this.icosafService.getOrdListByDateAndUC(uc, "2020-07-24").subscribe((orders: Order[]) => {
+
+      //Ottengo il primo ordine non terminato e definisco questo come ordine corrente
+      this.icosafService.currentOrder = orders.find(order => order.order_ts_end  && order.order_uc == uc)
+
+      //salvo nella sessione currentOrder
+      localStorage.setItem('currentOrder', JSON.stringify(this.icosafService.currentOrder));
+
+      this.router.navigate(['Home',uc])
+       
+    })
+  }
 
 }
