@@ -31,26 +31,33 @@ export class ICOSAFService {
     return this._subjectSelectedWorkAreaAndAgv.asObservable();
   }
 
+  subjectCurrentOrder: Subject<Order>
+
+
   // Processed order
   private _currentOrder: Order;
 
   public get currentOrder(): Order {
 
-    if (this._currentOrder)
-      return this._currentOrder;
+    if (this._currentOrder){
+       return this._currentOrder;
+    } 
     else {
       let currentOrder = JSON.parse(localStorage.getItem('currentOrder'))
-      if (currentOrder)
+      if (currentOrder){
         return currentOrder as Order
+      }
       else return null
     }
   }
   public set currentOrder(value: Order) {
+    this.subjectCurrentOrder.next(value)
     this._currentOrder = value;
   }
 
   constructor(private http: HttpClient) {
     this.subjectSelectedWorkAreaAndAgv = new Subject();
+    this.subjectCurrentOrder = new Subject();
   }
 
 

@@ -164,3 +164,21 @@ text-align: center;
 .textarea{
   width: 100%;
 }
+
+
+#problemi_prelievi{
+ width: 50%;
+}
+.flexDetails{
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+#ordini{
+  margin-left: 10px;
+  width: 40%;
+}
+
+.selected {
+  background-color: rgb(151, 175, 201)!important;
+}

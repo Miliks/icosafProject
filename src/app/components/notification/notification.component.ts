@@ -4,7 +4,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { ICOSAFService } from 'src/app/services/UC-C/uc-c-service.service';
+import { ICOSAFService } from 'src/app/services/UC-C/ICOSAFService.service';
 
 @Component({
   selector: 'app-notification',

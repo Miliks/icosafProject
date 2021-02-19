@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { ICOSAFService } from './uc-c-service.service';
+import { ICOSAFService } from './ICOSAFService.service';
 
 describe('UCCServiceService', () => {
   let service: ICOSAFService;

@@ -4,7 +4,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { Order } from 'src/app/model/order.model';
-import { ICOSAFService } from 'src/app/services/UC-C/uc-c-service.service';
+import { ICOSAFService } from 'src/app/services/UC-C/ICOSAFService.service';
 
 export interface Tile {
   color: string;
@@ -44,11 +44,9 @@ export class GridListUCComponent {
 
 
   onClickButton(useCase: string) {
-
     let uc;
     switch (useCase) {
       
-
       case 'A':   
       uc = "UC-A"
       this.recomputeOrderAndNavigate(uc);

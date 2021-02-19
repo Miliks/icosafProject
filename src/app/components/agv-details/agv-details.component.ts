@@ -13,7 +13,7 @@ import { SseService } from 'src/app/services/SseService/sse-service.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatPaginator } from '@angular/material/paginator';
 import { Subscription } from 'rxjs';
-import { ICOSAFService } from 'src/app/services/UC-C/uc-c-service.service';
+import { ICOSAFService } from 'src/app/services/UC-C/ICOSAFService.service';
 import { MatRadioGroup } from '@angular/material/radio';
 import { MatSort } from '@angular/material/sort';
 import { MatExpansionPanel } from '@angular/material/expansion';
@@ -49,6 +49,12 @@ interface Prelievo {
   task_id: Number;
 }
 
+//Element in the Order Panel
+interface VisualizedOrder {
+  state: Number;
+  id: Number;
+}
+
 
 @Component({
   selector: 'app-agv-details',
@@ -67,17 +73,24 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   sseSub: Subscription
 
   @ViewChild('problemPanel', { static: false }) problemPanel: MatExpansionPanel
+
   @ViewChild('matSortProblems') matSortProblems: MatSort;
   @ViewChild('matSortPrelievi') matSortPrelievi: MatSort;
+  @ViewChild('matSortOrdini') matSortOrdini: MatSort;
+
   @ViewChild("OperatorSelection") opSelection: MatRadioGroup
   @ViewChild("AGVActionSelected") AGVsel: MatRadioGroup
 
   dataSourceProblems: MatTableDataSource<Problem>
   displayedColumnsProblems = ['state', 'id', 'kit', 'problemsFound', 'button', 'hour'];
   expandedElement: Problem | null;
+
+  selectedOrder:VisualizedOrder
+
   isHidingProblemHandling: boolean
   AGVActionSelected: string
   OpActionSelected: string
+
   opChecked: boolean = false
 
   agvOptions = ['Ritentare', 'Rimanere fermo', 'Continuo attività']
@@ -92,11 +105,17 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedAgv: string;
   textAreaValue: string;
 
-  private _paginatorPrelievi: MatPaginator;
+  displayedColumnsOrdini: string[] = ['state', 'id']
+  dataSourceOrdini: MatTableDataSource<VisualizedOrder>
+  orders: Order[];
+
   paramsSub: Subscription;
   showCommentSection: boolean;
   rimanereFermoOption: boolean;
   selectedWorkArea: any;
+
+  private _paginatorPrelievi: MatPaginator;
+
 
   public get paginatorPrelievi(): MatPaginator {
     return this._paginatorPrelievi;
@@ -116,6 +135,15 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   public set paginatorErrors(value: MatPaginator) {
     this._paginatorErrors = value;
     this.dataSourceProblems.paginator = this.paginatorErrors
+  }
+
+  private _paginatorOrdini: MatPaginator;
+
+  public get paginatorOrdini(): MatPaginator {
+    return this._paginatorOrdini;
+  }
+  public set paginatorOrdini(value: MatPaginator) {
+    this._paginatorOrdini = value;
   }
 
   @ViewChild('autosize') autosize: CdkTextareaAutosize;
@@ -142,6 +170,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.dataSourcePrelievi = new MatTableDataSource()
     this.dataSourceProblems = new MatTableDataSource()
+    this.dataSourceOrdini = new MatTableDataSource()
 
     this.showCommentSection = false
     this.rimanereFermoOption = false
@@ -158,8 +187,10 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.paginatorPrelievi = this.dataSourcePrelievi.paginator
     this.paginatorErrors = this.dataSourceProblems.paginator
+    this.paginatorOrdini = this.dataSourceOrdini.paginator
     this.matSortProblems = this.dataSourcePrelievi.sort
     this.matSortPrelievi = this.dataSourcePrelievi.sort
+    this.matSortOrdini = this.dataSourceOrdini.sort
   }
 
   ngOnInit(): void {
@@ -174,21 +205,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.icosafService.subjectSelectedWorkAreaAndAgv.next([params['workAreaId'], Number(params['agvId'])])
 
-        if (!this.icosafService.currentOrder) {
-
-          //TODO remove timestamp hardcoded
-          this.icosafService.getOrdListByDateAndUC(this.useCase, "2020-07-24").subscribe((orders: Order[]) => {
-            //Ottengo il primo ordine non terminato e definisco questo come ordine corrente
-            this.icosafService.currentOrder = orders.find(order => order.order_ts_end == null)
-            //salvo nella sessione currentOrder
-            localStorage.setItem('currentOrder', JSON.stringify(this.icosafService.currentOrder));
-
-            this.initializeTables(params)
-          })
-
-        } else {
-          this.initializeTables(params)
-        }
+        this.initializeTables(params)
 
 
         if (!this.sseSub) {
@@ -517,129 +534,164 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   initializeTables(params) {
     console.log(this.icosafService.currentOrder.order_id, params['agvId']);
 
-    this.icosafService.getTaskListAgv(this.icosafService.currentOrder.order_id, Number(params['agvId'])).subscribe(tasks => {
 
-      console.log("getTaskListAGV", tasks);
+    //TODO remove timestamp hardcoded
+    this.icosafService.getOrdListByDateAndUC(this.useCase, "2020-07-24").subscribe((orders: Order[]) => {
 
-      let sourceProblems: Problem[] = []
-      let sourcePrelievi: Prelievo[] = []
+      // Setto ordini relativi allo use case
+      this.orders = orders;
+
+      this.initialiazeOrderPanel(orders)
+
+      //Ottengo il primo ordine non terminato e definisco questo come ordine corrente se non è settato
+      if (!this.icosafService.currentOrder)
+        this.icosafService.currentOrder = orders.find(order => order.order_ts_end == null)
+        
+      //salvo nella sessione currentOrder
+      localStorage.setItem('currentOrder', JSON.stringify(this.icosafService.currentOrder));
+
+      this.icosafService.getTaskListAgv(this.icosafService.currentOrder.order_id, Number(params['agvId'])).subscribe(tasks => {
+
+        console.log("getTaskListAGV", tasks);
+
+        let sourceProblems: Problem[] = []
+        let sourcePrelievi: Prelievo[] = []
+        //TODO: definire come dare settare le due data source problemi e prelievi
+        tasks.forEach((t: any) => {
 
 
-      //TODO: definire come dare settare le due data source problemi e prelievi
-      tasks.forEach((t: any) => {
+          let task = new Task(t.task_id, t.task_descr, t.det_short_id, t.order_id, t.start_time,
+            t.stop_time, t.task_status_id, t.task_comment, t.agv_id, t.oper_id, t.error_time, t.component_id,
+            t.task_type_id, t.task_ref, t.create_time)
 
 
-        let task = new Task(t.task_id, t.task_descr, t.det_short_id, t.order_id, t.start_time,
-          t.stop_time, t.task_status_id, t.task_comment, t.agv_id, t.oper_id, t.error_time, t.component_id,
-          t.task_type_id, t.task_ref, t.create_time)
+          switch (task.task_status_id) {
 
+            //created
+            case 1:
+              //  sourcePrelievi.push({
+              //   state: 1,
+              //   components: `PN${task.task_id}`,
+              //   kit: "45",
+              // //  hour: task.startTime.toLocaleTimeString('it', options)
+              // hour: new Date().toLocaleTimeString('it', options)
+              // })
+              break;
 
-        switch (task.task_status_id) {
+            //completed
+            case 2:
 
-          //created
-          case 1:
-            //  sourcePrelievi.push({
-            //   state: 1,
-            //   components: `PN${task.task_id}`,
-            //   kit: "45",
-            // //  hour: task.startTime.toLocaleTimeString('it', options)
-            // hour: new Date().toLocaleTimeString('it', options)
-            // })
-            break;
+              console.log("task", task);
 
-          //completed
-          case 2:
-
-            console.log("task", task);
-
-            //  console.log("STAMPA", task.computeDelayInMilliseconds())
-            sourcePrelievi.push({
-              state: task.error_time ? 5 : 2, // se ha avuto un errore allora error_solved
-              components: `${task.mach_det_id}`,
-              kit: `${task.task_descr}`,
-              //   hour: task.stop_time.toLocaleTimeString('it', options)
-              hour: task.start_time_date.toLocaleTimeString('it', options),
-              delay: task.computeDelayInMilliseconds() / 1000,
-              task_id: Number(task.task_id)
-            })
-
-            break;
-
-          //failed
-          case 3:
-
-            // c'è un errore ricavo tipologia problema
-            this.icosafService.getLastActiveError(Number(task.task_id)).subscribe(lastActiveError => {
-              this.taskErrorId = task.task_id
-              sourceProblems.push({
-                state: 3,
+              //  console.log("STAMPA", task.computeDelayInMilliseconds())
+              sourcePrelievi.push({
+                state: task.error_time ? 5 : 2, // se ha avuto un errore allora error_solved
                 components: `${task.mach_det_id}`,
                 kit: `${task.task_descr}`,
-                //hour: task.error_time.toLocaleTimeString('it', options),
-                hour: new Date().toLocaleTimeString('it', options),
-                problemsFound: `${lastActiveError[0].error_description}`,
-                button: '',
-                description: `Problem description`,
-                task_id: this.taskErrorId
+                //   hour: task.stop_time.toLocaleTimeString('it', options)
+                hour: task.start_time_date.toLocaleTimeString('it', options),
+                delay: task.computeDelayInMilliseconds() / 1000,
+                task_id: Number(task.task_id)
               })
-              this.dataSourceProblems.data = [...sourceProblems]
-              this.dataSourceProblems.paginator = this.paginatorErrors
-            })
-            console.log("task", task);
 
-            //  console.log("STAMPA", task.computeDelayInMilliseconds())
+              break;
 
-            break;
+            //failed
+            case 3:
 
-          // pending
-          case 4:
-            console.log("task", task);
+              // c'è un errore ricavo tipologia problema
+              this.icosafService.getLastActiveError(Number(task.task_id)).subscribe(lastActiveError => {
+                this.taskErrorId = task.task_id
+                sourceProblems.push({
+                  state: 3,
+                  components: `${task.mach_det_id}`,
+                  kit: `${task.task_descr}`,
+                  //hour: task.error_time.toLocaleTimeString('it', options),
+                  hour: new Date().toLocaleTimeString('it', options),
+                  problemsFound: `${lastActiveError[0].error_description}`,
+                  button: '',
+                  description: `Problem description`,
+                  task_id: this.taskErrorId
+                })
+                this.dataSourceProblems.data = [...sourceProblems]
+                this.dataSourceProblems.paginator = this.paginatorErrors
+              })
+              console.log("task", task);
 
-            //  console.log("STAMPA", task.computeDelayInMilliseconds())
-            sourcePrelievi.push({
-              state: 4,
-              components: `${task.mach_det_id}`,
-              kit: `${task.task_descr}`,
-              //   hour: task.stop_time.toLocaleTimeString('it', options)
-              hour: task.start_time_date.toLocaleTimeString('it', options),
-              delay: null,// TODO VERIFICARE SE CORRETTO,
-              task_id: Number(task.task_id)
-            })
-            break;
+              //  console.log("STAMPA", task.computeDelayInMilliseconds())
 
-          // error_solved
-          case 5:
-            console.log("task", task);
+              break;
 
-            //  console.log("STAMPA", task.computeDelayInMilliseconds())
-            sourcePrelievi.push({
-              state: 5,
-              components: `${task.mach_det_id}`,
-              kit: `${task.task_descr}`,
-              //   hour: task.stop_time.toLocaleTimeString('it', options)
-              hour: task.start_time_date.toLocaleTimeString('it', options),
-              delay: task.computeDelayInMilliseconds(),
-              task_id: Number(task.task_id)
-            })
-            break;
-        }
+            // pending
+            case 4:
+              console.log("task", task);
 
-        sourcePrelievi = sourcePrelievi.sort((a, b) => b.hour.localeCompare(a.hour))
-        this.dataSourcePrelievi.data = sourcePrelievi
+              //  console.log("STAMPA", task.computeDelayInMilliseconds())
+              sourcePrelievi.push({
+                state: 4,
+                components: `${task.mach_det_id}`,
+                kit: `${task.task_descr}`,
+                //   hour: task.stop_time.toLocaleTimeString('it', options)
+                hour: task.start_time_date.toLocaleTimeString('it', options),
+                delay: null,// TODO VERIFICARE SE CORRETTO,
+                task_id: Number(task.task_id)
+              })
+              break;
 
-        this.dataSourceProblems.data = [...sourceProblems]
+            // error_solved
+            case 5:
+              console.log("task", task);
 
-        this.dataSourcePrelievi.paginator = this.paginatorPrelievi
-        this.dataSourcePrelievi.sort = this.matSortPrelievi
-        this.dataSourceProblems.paginator = this.paginatorErrors
-        this.dataSourceProblems.sort = this.matSortProblems
+              //  console.log("STAMPA", task.computeDelayInMilliseconds())
+              sourcePrelievi.push({
+                state: 5,
+                components: `${task.mach_det_id}`,
+                kit: `${task.task_descr}`,
+                //   hour: task.stop_time.toLocaleTimeString('it', options)
+                hour: task.start_time_date.toLocaleTimeString('it', options),
+                delay: task.computeDelayInMilliseconds(),
+                task_id: Number(task.task_id)
+              })
+              break;
+          }
 
-        console.log("PRELIEVI: ", this.dataSourcePrelievi.data)
-        console.log("PROBLEMS: ", this.dataSourceProblems.data);
+          sourcePrelievi = sourcePrelievi.sort((a, b) => b.hour.localeCompare(a.hour))
+          this.dataSourcePrelievi.data = sourcePrelievi
 
+          this.dataSourceProblems.data = [...sourceProblems]
+
+          this.dataSourcePrelievi.paginator = this.paginatorPrelievi
+          this.dataSourcePrelievi.sort = this.matSortPrelievi
+          this.dataSourceProblems.paginator = this.paginatorErrors
+          this.dataSourceProblems.sort = this.matSortProblems
+
+          console.log("PRELIEVI: ", this.dataSourcePrelievi.data)
+          console.log("PROBLEMS: ", this.dataSourceProblems.data);
+
+        })
       })
-    })
+    });
+
   }
+  initialiazeOrderPanel(orders: Order[]) {
+    console.log("Ordini ricevuti: ", orders);
+    let visualizedOrders = [] as VisualizedOrder[]
+    orders.forEach(order => {
+      let visualizedOrder = { state: order.order_status_id, id: order.order_id }
+      visualizedOrders.push(visualizedOrder)
+    });
+    this.dataSourceOrdini.data = [...visualizedOrders];
+    this.selectedOrder = this.dataSourceOrdini.data.find(order => order.id == this.icosafService.currentOrder.order_id)
+    console.log("ORDINI: ", this.dataSourceOrdini.data);
+  }
+
+  selectOrder(visualizedOrder: VisualizedOrder) {
+    this.selectedOrder = visualizedOrder
+    let selectedOrder = this.orders.find(order => order.order_id == visualizedOrder.id)
+    this.icosafService.currentOrder = selectedOrder;
+    this.ngOnInit()
+  }
+
 }
 
 

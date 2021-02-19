@@ -45,6 +45,7 @@ mat-list-option {
 
 mat-sidenav-content {
     height: 100%;
+    width: 100%;
     min-height: 95vh;
 }
 #logIcon{

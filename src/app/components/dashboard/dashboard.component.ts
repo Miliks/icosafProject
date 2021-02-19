@@ -9,7 +9,7 @@ import { Agv } from 'src/app/model/agv.model';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { EXPANSION_PANEL_ANIMATION_TIMING } from '@angular/material/expansion';
-import { ICOSAFService } from 'src/app/services/UC-C/uc-c-service.service';
+import { ICOSAFService } from 'src/app/services/UC-C/ICOSAFService.service';
 import { Order } from 'src/app/model/order.model';
 import { Task } from 'src/app/model/task.model';
 import { SseService } from 'src/app/services/SseService/sse-service.service';
@@ -46,7 +46,7 @@ export class DashboardComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private sseService: SseService,
     private router: Router,
-    private icosafService: ICOSAFService) {
+    public icosafService: ICOSAFService) {
 
     this.stateJPH = 'collapsed';
     this.stateSat = 'collapsed'
@@ -54,7 +54,7 @@ export class DashboardComponent implements OnInit {
 
     this.progress = 75
     this.workAreas = []
-    this.allWorkAreas = [new WorkArea(1, "AMR", [new Agv(1), new Agv(2)]) , new WorkArea(2, "CSKP", [new Agv(3), new Agv(4), new Agv(5), new Agv(6)])]
+    this.allWorkAreas = [new WorkArea(1, "AMR", [new Agv(1), new Agv(2)]), new WorkArea(2, "CSKP", [new Agv(3), new Agv(4), new Agv(5), new Agv(6)])]
 
   }
 
@@ -108,7 +108,8 @@ export class DashboardComponent implements OnInit {
         this.icosafService.getOrdListByDateAndUC(this.useCase, "2020-07-24").subscribe((orders: Order[]) => {
 
           //Ottengo il primo ordine non terminato e definisco questo come ordine corrente
-          this.icosafService.currentOrder = orders.find(order => order.order_ts_end  && order.order_uc == this.useCase)
+          if (!this.icosafService.currentOrder)
+            this.icosafService.currentOrder = orders.find(order => order.order_ts_end && order.order_uc == this.useCase)
 
           //salvo nella sessione currentOrder
           localStorage.setItem('currentOrder', JSON.stringify(this.icosafService.currentOrder));
@@ -139,11 +140,26 @@ export class DashboardComponent implements OnInit {
             })
 
           })
+
+          // Order has changed
+          this.icosafService.subjectCurrentOrder.subscribe((newOrder)=>{
+            this.orderHasChanged(newOrder)
+          })
+        
       }
     })
   }
 
+  orderHasChanged(newOrder:Order){
 
+    this.icosafService.getTaskListOrder(newOrder.order_id).subscribe((tasks: Task[]) => {
+      // Per ricavare la workarea in cui lavora il nostro agv facciamo una ricerca interna per il momento
+      // w1.agvList[0].setProgress(completed*100/total)
+      // w1.agvList[0].setError(error)
+      //Funziona solo se esiste almeno un task
+      calculatePercentage(tasks, this.workAreas)
+    })
+  }
 
   /**
    * Custom method to manage the expansion of the panel related to the stats as the designer told us
@@ -210,20 +226,20 @@ export class DashboardComponent implements OnInit {
       this.router.navigate(["Home", `${this.useCase}`])
     }
   }
-  recomputeWorkAreas(params : Params){
+  recomputeWorkAreas(params: Params) {
     if (params['useCase']) {
       this.useCase = params['useCase']
 
       let w1_2 = this.useCase === "UC-C" ? new WorkArea(1, "AMR", [new Agv(1), new Agv(2)]) : new WorkArea(2, "CSKP", [new Agv(3), new Agv(4), new Agv(5), new Agv(6)])
-    this.workAreas = []
+      this.workAreas = []
       this.workAreas.push(w1_2) // w5, w3, w4
 
       if (!this.selectedWorkArea && !this.selectedAgv) {
         this.selectWorkArea(this.workAreas[0])
         this.openAgvDetails(this.selectedWorkArea, this.selectedWorkArea.agvList[0]);
       }
+    }
   }
-}
   /**
    * Method to show the mock stats
    * @param typeGraph 
@@ -279,7 +295,7 @@ export function calculatePercentage(tasks: Task[], workAreas: WorkArea[]) {
       }
     }
   }
-  
+
   let agv
   let wa
   // console.log("WA", workAreas)
@@ -293,14 +309,14 @@ export function calculatePercentage(tasks: Task[], workAreas: WorkArea[]) {
     })
 
     let currentStat = agvIdsMap.get(id)
-    
+
     wa.agvList.find(a => a.id == id).setProgress(currentStat.completed * 100 / currentStat.total)
-    
+
     wa.agvList.find(a => a.id == id).setError(currentStat.error)
-  
+
   }
 
-  
+
 }
 
 interface Statistics {
