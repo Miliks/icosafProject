@@ -141,16 +141,16 @@ export class DashboardComponent implements OnInit {
 
           })
 
-          // Order has changed
-          this.icosafService.subjectCurrentOrder.subscribe((newOrder)=>{
-            this.orderHasChanged(newOrder)
-          })
-        
+
       }
+    })
+    // Order has changed
+    this.icosafService.subjectCurrentOrder.subscribe((newOrder) => {
+      this.orderHasChanged(newOrder)
     })
   }
 
-  orderHasChanged(newOrder:Order){
+  orderHasChanged(newOrder: Order) {
 
     this.icosafService.getTaskListOrder(newOrder.order_id).subscribe((tasks: Task[]) => {
       // Per ricavare la workarea in cui lavora il nostro agv facciamo una ricerca interna per il momento

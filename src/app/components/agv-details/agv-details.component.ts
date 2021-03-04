@@ -304,6 +304,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
                       this.dataSourceProblems.paginator = this.paginatorErrors
                       this.dataSourceProblems.sort = this.matSortProblems
+                      this.initializeTables(this.activatedRoute.snapshot.params)
                     })
                   }
                 }
@@ -689,7 +690,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedOrder = visualizedOrder
     let selectedOrder = this.orders.find(order => order.order_id == visualizedOrder.id)
     this.icosafService.currentOrder = selectedOrder;
-    this.ngOnInit()
+    this.initializeTables(this.activatedRoute.snapshot.params)
   }
 
 }
