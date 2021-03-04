@@ -154,11 +154,14 @@
 .dialogTitle{
 text-align: center;
 }
+.stateColumn{
+  width: 5%;
+}
 .normalColumn{
-  padding: 10px;
+  padding: 4px;
 }
 .lastColumn{
-  padding: 10px;
+  padding: 1px;
 }
 
 .textarea{
@@ -167,7 +170,7 @@ text-align: center;
 
 
 #problemi_prelievi{
- width: 50%;
+ width: 60%;
 }
 .flexDetails{
   display: flex;
@@ -176,9 +179,15 @@ text-align: center;
 }
 #ordini{
   margin-left: 10px;
-  width: 40%;
+  width: 25%;
 }
 
 .selected {
   background-color: rgb(151, 175, 201)!important;
+}
+
+
+:host /deep/ .mat-expansion-panel-body {
+  padding: 0;
+  margin: 0 2px 16px;
 }

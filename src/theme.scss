@@ -37,6 +37,9 @@ $custom: map-get($my-app-theme, custom);
 .mat-inactive {
     color: mat-color($custom, inactive);
 }
+.mat-danger{
+    color: mat-color($custom, danger);
+}
 
 @include angular-material-theme($my-app-theme);
 
