@@ -682,7 +682,17 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
       visualizedOrders.push(visualizedOrder)
     });
     this.dataSourceOrdini.data = [...visualizedOrders];
-    this.selectedOrder = this.dataSourceOrdini.data.find(order => order.id == this.icosafService.currentOrder.order_id)
+    console.log("CHECK uc: ",this.icosafService.currentOrder.order_uc,this.useCase);
+    
+    if(this.icosafService.currentOrder.order_uc == this.useCase)
+    // se non è selezionato lo stesso use case
+      this.selectedOrder = this.dataSourceOrdini.data.find(order => order.id == this.icosafService.currentOrder.order_id)
+      else{
+        console.log("SELECTED ORDER:",this.icosafService.currentOrder,this.dataSourceOrdini.data)
+        this.selectedOrder = this.dataSourceOrdini.data.find(order => order.state == 2 || order.state == 1)
+        this.icosafService.currentOrder = this.orders.find( order => order.order_id == this.selectedOrder.id)
+        this.selectOrder(this.selectedOrder)
+      }
     console.log("ORDINI: ", this.dataSourceOrdini.data);
   }
 

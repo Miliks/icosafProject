@@ -65,7 +65,7 @@ export class GridListUCComponent {
     this.icosafService.getOrdListByDateAndUC(uc, "2020-07-24").subscribe((orders: Order[]) => {
 
       //Ottengo il primo ordine non terminato e definisco questo come ordine corrente
-      this.icosafService.currentOrder = orders.find(order => order.order_ts_end  && order.order_uc == uc)
+      this.icosafService.currentOrder = orders.find(order => order.order_status_id==2  && order.order_uc == uc)
 
       //salvo nella sessione currentOrder
       localStorage.setItem('currentOrder', JSON.stringify(this.icosafService.currentOrder));
