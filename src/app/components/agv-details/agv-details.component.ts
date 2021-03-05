@@ -25,7 +25,7 @@ import { take } from 'rxjs/operators';
 
 
 // Options used to show the timestamp with the following format
-const options = { hour: "numeric", minute: "numeric", second: "numeric" }
+const options: Intl.DateTimeFormatOptions = { hour: "numeric", minute: "numeric", second: "numeric" }
 
 // Element in the problems panel
 export interface Problem {
@@ -85,7 +85,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   displayedColumnsProblems = ['state', 'id', 'kit', 'problemsFound', 'button', 'hour'];
   expandedElement: Problem | null;
 
-  selectedOrder:VisualizedOrder
+  selectedOrder: VisualizedOrder
 
   isHidingProblemHandling: boolean
   AGVActionSelected: string
@@ -547,13 +547,13 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
       //Ottengo il primo ordine non terminato e definisco questo come ordine corrente se non è settato
       if (!this.icosafService.currentOrder)
         this.icosafService.currentOrder = orders.find(order => order.order_ts_end == null)
-        
+
       //salvo nella sessione currentOrder
       localStorage.setItem('currentOrder', JSON.stringify(this.icosafService.currentOrder));
 
       this.icosafService.getTaskListAgv(this.icosafService.currentOrder.order_id, Number(params['agvId'])).subscribe(tasks => {
 
-        console.log("getTaskListAGV", tasks);
+        console.log("getTaskListAGV", this.icosafService.currentOrder.order_id,Number(params['agvId']),tasks);
 
         let sourceProblems: Problem[] = []
         let sourcePrelievi: Prelievo[] = []
@@ -655,10 +655,10 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
               })
               break;
           }
+        })
 
-          sourcePrelievi = sourcePrelievi.sort((a, b) => b.hour.localeCompare(a.hour))
-          this.dataSourcePrelievi.data = sourcePrelievi
-
+        sourcePrelievi = sourcePrelievi.sort((a, b) => b.hour.localeCompare(a.hour))
+          this.dataSourcePrelievi.data = [...sourcePrelievi]
           this.dataSourceProblems.data = [...sourceProblems]
 
           this.dataSourcePrelievi.paginator = this.paginatorPrelievi
@@ -669,7 +669,6 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
           console.log("PRELIEVI: ", this.dataSourcePrelievi.data)
           console.log("PROBLEMS: ", this.dataSourceProblems.data);
 
-        })
       })
     });
 
@@ -682,24 +681,26 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
       visualizedOrders.push(visualizedOrder)
     });
     this.dataSourceOrdini.data = [...visualizedOrders];
-    console.log("CHECK uc: ",this.icosafService.currentOrder.order_uc,this.useCase);
-    
-    if(this.icosafService.currentOrder.order_uc == this.useCase)
-    // se non è selezionato lo stesso use case
+    console.log("CHECK uc: ", this.icosafService.currentOrder.order_uc, this.useCase);
+
+    if (this.icosafService.currentOrder.order_uc == this.useCase) {
+      // se è selezionato lo stesso use case
+      console.log("Ordine selezionato: ", this.icosafService.currentOrder, this.dataSourceOrdini.data)
       this.selectedOrder = this.dataSourceOrdini.data.find(order => order.id == this.icosafService.currentOrder.order_id)
-      else{
-        console.log("SELECTED ORDER:",this.icosafService.currentOrder,this.dataSourceOrdini.data)
-        this.selectedOrder = this.dataSourceOrdini.data.find(order => order.state == 2 || order.state == 1)
-        this.icosafService.currentOrder = this.orders.find( order => order.order_id == this.selectedOrder.id)
-        this.selectOrder(this.selectedOrder)
-      }
+    }
+    else {
+      console.log("SELECTED ORDER:", this.icosafService.currentOrder, this.dataSourceOrdini.data)
+      this.selectedOrder = this.dataSourceOrdini.data.find(order => order.state == 2 || order.state == 1)
+      this.icosafService.currentOrder = this.orders.find(order => order.order_id == this.selectedOrder.id)
+      this.selectOrder(this.selectedOrder)
+    }
     console.log("ORDINI: ", this.dataSourceOrdini.data);
   }
 
   selectOrder(visualizedOrder: VisualizedOrder) {
     this.selectedOrder = visualizedOrder
     let selectedOrder = this.orders.find(order => order.order_id == visualizedOrder.id)
-    this.icosafService.currentOrder = selectedOrder;
+    this.icosafService.currentOrder = selectedOrder
     this.initializeTables(this.activatedRoute.snapshot.params)
   }
 
