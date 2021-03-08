@@ -227,7 +227,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
               // console.log(uc, this.useCase, response.agv_id, response.agv_id, this.selectedAgv)
 
-              if (uc === this.useCase && event.agv_id !== null && event.agv_id === Number(this.selectedAgv)) {
+              if (uc === this.useCase && event.agv_id !== null && event.agv_id === Number(this.selectedAgv) && event.order_id == this.icosafService.currentOrder) {
 
                 if (event.status === "OK") {
 
@@ -681,20 +681,20 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
       visualizedOrders.push(visualizedOrder)
     });
     this.dataSourceOrdini.data = [...visualizedOrders];
-    console.log("CHECK uc: ", this.icosafService.currentOrder.order_uc, this.useCase);
+    console.log("initializeOrderPanel - CHECK UC: ", this.icosafService.currentOrder.order_uc, this.useCase);
 
     if (this.icosafService.currentOrder.order_uc == this.useCase) {
       // se è selezionato lo stesso use case
-      console.log("Ordine selezionato: ", this.icosafService.currentOrder, this.dataSourceOrdini.data)
+      console.log("initializeOrderPanel - Ordine selezionato: ", this.icosafService.currentOrder, this.dataSourceOrdini.data)
       this.selectedOrder = this.dataSourceOrdini.data.find(order => order.id == this.icosafService.currentOrder.order_id)
     }
     else {
-      console.log("SELECTED ORDER:", this.icosafService.currentOrder, this.dataSourceOrdini.data)
+      console.log("initializeOrderPanel - SELECTED ORDER:", this.icosafService.currentOrder, this.dataSourceOrdini.data)
       this.selectedOrder = this.dataSourceOrdini.data.find(order => order.state == 2 || order.state == 1)
       this.icosafService.currentOrder = this.orders.find(order => order.order_id == this.selectedOrder.id)
       this.selectOrder(this.selectedOrder)
     }
-    console.log("ORDINI: ", this.dataSourceOrdini.data);
+    console.log("initializeOrderPanel - ORDINI in tabella: ", this.dataSourceOrdini.data);
   }
 
   selectOrder(visualizedOrder: VisualizedOrder) {
