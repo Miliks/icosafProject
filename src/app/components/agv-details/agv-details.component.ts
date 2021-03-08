@@ -45,7 +45,7 @@ interface Prelievo {
   components: string
   kit: string;
   hour: string;
-  delay: number;
+  delay: Number;
   task_id: Number;
 }
 
@@ -561,7 +561,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
         tasks.forEach((t: any) => {
 
 
-          let task = new Task(t.task_id, t.task_descr, t.det_short_id, t.order_id, t.start_time,
+          let task = new Task(t.task_id, t.task_descr,t.delay, t.det_short_id, t.order_id, t.start_time,
             t.stop_time, t.task_status_id, t.task_comment, t.agv_id, t.oper_id, t.error_time, t.component_id,
             t.task_type_id, t.task_ref, t.create_time)
 
@@ -591,7 +591,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
                 kit: `${task.task_descr}`,
                 //   hour: task.stop_time.toLocaleTimeString('it', options)
                 hour: task.start_time_date.toLocaleTimeString('it', options),
-                delay: task.computeDelayInMilliseconds() / 1000,
+                delay: task.delay,
                 task_id: Number(task.task_id)
               })
 
@@ -650,7 +650,7 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
                 kit: `${task.task_descr}`,
                 //   hour: task.stop_time.toLocaleTimeString('it', options)
                 hour: task.start_time_date.toLocaleTimeString('it', options),
-                delay: task.computeDelayInMilliseconds(),
+                delay: task.delay,
                 task_id: Number(task.task_id)
               })
               break;

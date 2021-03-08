@@ -1,4 +1,10 @@
 export class Task{
+    public get delay(): Number {
+        return this._delay;
+    }
+    public set delay(value: Number) {
+        this._delay = value;
+    }
 
     private _create_time_date: Date;
     private _start_time_date: Date;
@@ -130,6 +136,7 @@ export class Task{
     constructor(
         private _task_id: Number,
         private _task_descr: String,
+        private _delay: Number,
         private _mach_det_id: Number,
         private _order_id: Number,
         private _start_time: string,
