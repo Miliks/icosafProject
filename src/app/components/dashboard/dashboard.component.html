@@ -70,7 +70,7 @@
                                 </mat-expansion-panel>
                             </mat-accordion>
 
-                            <mat-accordion (click)="openGraph('SAT')">
+                            <mat-accordion (click)="openGraph('SAT'); $event.stopPropagation();">
                                 <mat-expansion-panel #expPanelSat disabled="true">
                                     <mat-expansion-panel-header>
                                         <mat-panel-title>
@@ -84,7 +84,7 @@
                                 </mat-expansion-panel>
                             </mat-accordion>
 
-                            <mat-accordion (click)="openGraph('JPH')">
+                            <mat-accordion (click)="openGraph('JPH'); $event.stopPropagation();">
                                 <mat-expansion-panel #expPanelJPH disabled="true">
                                     <mat-expansion-panel-header>
                                         <mat-panel-title>
