@@ -31,7 +31,7 @@
 .cardsContainer {
     width: auto;
     display: flex;
-    min-width: 25%;
+    min-width: fit-content;
     flex-direction: column;
     background-color: #E8E9EE;
     padding: 20px;
