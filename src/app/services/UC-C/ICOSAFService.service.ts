@@ -168,6 +168,22 @@ export class ICOSAFService {
     let url = `http://${environment.serverHost}/Details/getMappingErAct?error_type_id=${error_type_id}&solve_action_type_id=${solve_action_type_id}`
     return this.http.get<any>(url).pipe(retry(3))
   }
+
+  getCycleTime(use_case: string){
+    let url = `http://${environment.serverHost}/Details/getCycleTime?uc_c=${use_case}`
+    return this.http.get<any>(url).pipe(retry(3))
+  }
+
+  getSAT(use_case: string){
+    let url = `http://${environment.serverHost}/Details/getSaturation?uc_c=${use_case}`
+    return this.http.get<any>(url).pipe(retry(3))
+  }
+
+  getJPH(use_case: string){
+    let url = `http://${environment.serverHost}/Details/getJPH?uc_c=${use_case}`
+    return this.http.get<any>(url).pipe(retry(3))
+  }
+
 }
 
 
