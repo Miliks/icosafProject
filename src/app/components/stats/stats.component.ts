@@ -88,6 +88,7 @@ export class StatsComponent implements OnInit, AfterViewInit {
         title: title
       },
       axisX: {
+        interval: 1,
         title: axisXLabel
       },
       legend: {
