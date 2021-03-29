@@ -158,7 +158,7 @@ export class DashboardComponent implements OnInit {
       // w1.agvList[0].setError(error)
       //Funziona solo se esiste almeno un task
       let w1_2 = this.useCase === "UC-C" ? new WorkArea(1, "AMR", [new Agv(1), new Agv(2)]) : new WorkArea(2, "CSKP", [new Agv(3), new Agv(4), new Agv(5), new Agv(6)])
-      this.workAreas = [ w1_2 ]
+      this.workAreas = [w1_2]
       calculatePercentage(tasks, this.workAreas)
     })
   }
@@ -221,12 +221,7 @@ export class DashboardComponent implements OnInit {
    */
   selectWorkArea(workArea: WorkArea) {
     this.selectedAgv = null
-    if (this.selectedWorkArea == null)
-      this.selectedWorkArea = workArea
-    else {
-      this.selectedWorkArea = null
-      this.router.navigate(["Home", `${this.useCase}`])
-    }
+    this.selectedWorkArea = workArea
   }
   recomputeWorkAreas(params: Params) {
     if (params['useCase']) {
@@ -298,8 +293,8 @@ export function calculatePercentage(tasks: Task[], workAreas: WorkArea[]) {
     }
   }
 
-  let agv:Agv
-  let wa:WorkArea
+  let agv: Agv
+  let wa: WorkArea
   // console.log("WA", workAreas)
 
   for (let id of agvIdsMap.keys()) {
@@ -311,7 +306,7 @@ export function calculatePercentage(tasks: Task[], workAreas: WorkArea[]) {
     })
 
     let currentStat = agvIdsMap.get(id)
-    console.log("CHECK WORKAREA ",wa)
+    console.log("CHECK WORKAREA ", wa)
     wa.agvList.find(a => a.id == id).setProgress(currentStat.completed * 100 / currentStat.total)
 
     wa.agvList.find(a => a.id == id).setError(currentStat.error)
