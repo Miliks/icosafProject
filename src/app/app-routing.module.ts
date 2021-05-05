@@ -9,6 +9,7 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { AgvDetailsComponent } from './components/agv-details/agv-details.component';
 import { StatsComponent } from './components/stats/stats.component';
 import { PerimetralLoginComponent } from './components/login/perimetral-login/perimetral-login.component';
+import { LoginDialogComponent } from './components/login/login-dialog/login-dialog.component';
 
 const routes: Routes = [
   {
@@ -30,6 +31,10 @@ const routes: Routes = [
   {
     path: 'use-case-details',
     component: UseCaseDetailsComponent,
+  },
+  {
+    path: 'login-dialog',
+    component: LoginDialogComponent,
   },
   {
     path: 'Home/:useCase',

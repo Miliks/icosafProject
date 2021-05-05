@@ -8,12 +8,14 @@ div {
 }
 
 button, mat-form-field, input {
-    width: 95%;
+    width: 30%;
+    align-items: center;
+    margin-left: 30%;
 }
 
 h1 {
     text-align: center;
 }
 .mat-form-field-wrapper {
-	 padding-bottom: 0em;
+	 padding-bottom: 1em;
 }

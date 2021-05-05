@@ -68,22 +68,7 @@ export class DashboardComponent implements OnInit {
         this.useCase = params['useCase']
 
         let w1_2 = this.useCase === "UC-C" ? new WorkArea(1, "AMR", [new Agv(1), new Agv(2)]) : new WorkArea(2, "CSKP", [new Agv(3), new Agv(4), new Agv(5), new Agv(6)])
-        //   let w3 = new WorkArea(3, "3", [new Agv(10), new Agv(11)])
-        //   let w4 = new WorkArea(4, "4", [new Agv(12), new Agv(13)])
-        //   let w5 = new WorkArea(5, "5", [new Agv(8), new Agv(9)])
-
-        //    w5.agvList[0].setProgress(100)
-        //    w5.agvList[1].setProgress(52)
-        //    w5.agvList[1].setError(true)
-
-        //    w3.agvList[0].setProgress(100)
-        //   w3.agvList[1].setProgress(52)
-        //    w3.agvList[1].setError(true)
-
-        //    w4.agvList[0].setProgress(77)
-        //    w4.agvList[1].setProgress(99)
-        //    w4.agvList[1].setError(true)
-
+        
         this.workAreas.push(w1_2) // w5, w3, w4
 
 
@@ -97,10 +82,7 @@ export class DashboardComponent implements OnInit {
           console.log(workAreaAndAgvIds);
 
           this.selectedWorkArea = this.allWorkAreas.find(workArea => workArea.name == workAreaAndAgvIds[0])//workArea.id === workAreaAndAgvIds[0] || 
-          //this.selectWorkArea(this.workAreas.find(workArea => workArea.id === workAreaAndAgvIds[0]))
-          //console.log("selected is ", this.selectedWorkArea);      
-          //console.log("its AGVList is ", this.selectedWorkArea.agvList);
-
+          
           this.openAgvDetails(this.selectedWorkArea, this.selectedWorkArea.agvList.find(agv => agv.id === workAreaAndAgvIds[1]))
         })
 
@@ -116,10 +98,7 @@ export class DashboardComponent implements OnInit {
 
           this.icosafService.getTaskListOrder(this.icosafService.currentOrder.order_id).subscribe((tasks: Task[]) => {
             // Per ricavare la workarea in cui lavora il nostro agv facciamo una ricerca interna per il momento
-            // w1.agvList[0].setProgress(completed*100/total)
-            // w1.agvList[0].setError(error)
-            //Funziona solo se esiste almeno un task
-            calculatePercentage(tasks, this.workAreas)
+                calculatePercentage(tasks, this.workAreas)
           })
         })
 
@@ -133,9 +112,7 @@ export class DashboardComponent implements OnInit {
             //recompute percentage tasks
             this.icosafService.getTaskListOrder(this.icosafService.currentOrder.order_id).subscribe((tasks: Task[]) => {
               // Per ricavare la workarea in cui lavora il nostro agv facciamo una ricerca interna per il momento
-              // w1.agvList[0].setProgress(completed*100/total)
-              // w1.agvList[0].setError(error)
-              //Funziona solo se esiste almeno un task
+             //Funziona solo se esiste almeno un task
               calculatePercentage(tasks, this.workAreas)
             })
 

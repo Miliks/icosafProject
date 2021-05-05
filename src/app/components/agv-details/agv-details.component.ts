@@ -161,9 +161,11 @@ export class AgvDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isHidingProblemHandling = true
     this.problems = []
     this.problems.push(
-      { image: "../../../assets/img/errorIcon.svg" },
+     /* { image: "../../../assets/img/errorIcon.svg" },
       { image: "../../../assets/img/dangerIcon.svg" },
-      { image: "../../../assets/img/settingIconSelected.svg" }
+      { image: "../../../assets/img/settingIconSelected.svg" }*/
+      {image:"http://localhost:3000/images/1.png"},
+      {image:"http://localhost:3000/images/2.png"}
     )
 
     this.AGVActionSelection("");
